@@ -89,7 +89,7 @@
             android:enabled="true" />
 
         <receiver
-            android:name=".GCMBroadcastReceiver"
+            android:name="co.vector.itube.GCMBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />

@@ -41,6 +41,16 @@ public class SignupActivity extends Activity {
         else {
             setContentView(R.layout.signup_activity);
         }
+        if (!baseClass.isConnectingToInternet()) {
+
+            // Internet Connection is not present
+            baseClass.showAlertDialog(SignupActivity.this,
+                    "Internet Connection Error",
+                    "Please connect to Internet connection", false);
+            // stop executing code by return
+            return;
+        }
+
         registerGCM(this);
         final Button Signup = (Button) findViewById(R.id.email_sign_in_button);
         baseClass = ((BaseClass) getApplicationContext());
@@ -55,12 +65,12 @@ public class SignupActivity extends Activity {
                 }catch(NullPointerException e){}
                 if(aq.id(R.id.email).getText().toString().isEmpty())
                 {
-                    Crouton.makeText(SignupActivity.this,"Enter Email.",Style.ALERT).show();
+                    Crouton.makeText(SignupActivity.this, "Enter Email.", Style.ALERT).show();
                     return;
                 }
                 if(aq.id(R.id.password).getText().toString().isEmpty())
                 {
-                    Crouton.makeText(SignupActivity.this,"Enter Password.",Style.ALERT).show();
+                    Crouton.makeText(SignupActivity.this,"Enter Password.", Style.ALERT).show();
                     return;
                 }
                 if(aq.id(R.id.confirm_password).getText().toString().isEmpty())
@@ -125,67 +135,6 @@ public class SignupActivity extends Activity {
             mRegisterTask.cancel(true);
         }
         super.onDestroy();
-    }
-
-
-    public void GCMRegistration()
-    {
-        ///////////////////////////////////////////////////////////////
-        if (!baseClass.isConnectingToInternet()) {
-
-            // Internet Connection is not present
-            baseClass.showAlertDialog(SignupActivity.this,
-                    "Internet Connection Error",
-                    "Please connect to Internet connection", false);
-            // stop executing code by return
-            return;
-        }
-
-
-        // Make sure the device has the proper dependencies.
-        //  GCMRegistrar.checkDevice(this);
-
-        // Make sure the manifest permissions was properly set
-        //  GCMRegistrar.checkManifest(this);
-
-
-        // Register custom Broadcast receiver to show messages on activity
-        // registerReceiver(mHandleMessageReceiver, new IntentFilter(
-        //      Config.DISPLAY_MESSAGE_ACTION));
-
-        // Get GCM registration id
-        if(baseClass.getGCM_Key().equalsIgnoreCase("")) {
-//            regId = GCMRegistrar.getRegistrationId(this);
-//            baseClass.setGCM_Key(regId);
-//            GCMRegistrar.register(this, Config.GOOGLE_SENDER_ID);
-//            Log.e("ID", regId);
-
-        }
-
-        final Context context = this;
-        mRegisterTask = new AsyncTask<Void, Void, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... params) {
-
-                // Register on our server
-                // On server creates a new user
-                baseClass.register(context, baseClass.getAUTH_TOKEN(),  aq.id(R.id.email).getText().toString(), regId);
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Void result) {
-                mRegisterTask = null;
-            }
-
-        };
-
-        // execute AsyncTask
-        mRegisterTask.execute(null, null, null);
-
-        ////////////////////////////////////////////////////////////////////////////
     }
 
     static void registerGCM(final Context context)  {
