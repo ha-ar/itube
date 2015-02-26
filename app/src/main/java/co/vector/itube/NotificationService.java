@@ -37,7 +37,7 @@ public class NotificationService extends Service {
 		 */
 		Intent intent1 = new Intent(this.getApplicationContext(), LoginActivity.class);
 
-		Notification notification = new Notification(R.drawable.logo,
+		Notification notification = new Notification(R.drawable.notify_logo,
 				"Please Get Subscription,Only 2 days Left.", System.currentTimeMillis());
 
 		intent1.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -50,7 +50,7 @@ public class NotificationService extends Service {
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
 		notification.setLatestEventInfo(this.getApplicationContext(),
-				"Javan Tube Alert", "Please Get Subscription,Only 2 days Left.",
+				"iTube Alert", "Please Get Subscription,Only 2 days Left.",
 				pendingNotificationIntent);
 
 		mManager.notify(0, notification);

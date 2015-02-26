@@ -17,7 +17,8 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.SearchView;
 import android.widget.TextView;
-
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 import com.androidquery.AQuery;
 
 import java.util.ArrayList;
@@ -27,8 +28,6 @@ import DB.DaoMaster;
 import DB.DaoSession;
 import DB.Playlist;
 import DB.PlaylistDao;
-import de.keyboardsurfer.android.widget.crouton.Crouton;
-import de.keyboardsurfer.android.widget.crouton.Style;
 
 /**
  * Created by android on 11/20/14.

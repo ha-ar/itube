@@ -1,16 +1,12 @@
 package co.vector.itube;
 
 import android.app.Activity;
-import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.View;
@@ -24,17 +20,15 @@ import com.androidquery.AQuery;
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.Position;
 
-import java.util.Calendar;
-
 /**
  * Created by android on 11/13/14.
  */
 public class BaseActivity extends Activity {
-static  TextView language;AQuery aq;int open;static PopupWindow popupWindow;
+    static  TextView language;AQuery aq;int open;static PopupWindow popupWindow;
     static  BaseClass baseClass;static SearchView searchView;LinearLayout layout;MenuDrawer mDrawerLeft;
     static BroadcastReceiver receiver = null;
-    Calendar newAlarmTime;
-    AlarmManager alarmManager;Intent intentAlarm;
+    static Long minutes;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +40,11 @@ static  TextView language;AQuery aq;int open;static PopupWindow popupWindow;
         mDrawerLeft.setupUpIndicator(this);
         baseClass  =((BaseClass) getApplicationContext());
         aq = new AQuery(this);
+
+//        minutes = Long.valueOf(baseClass.getCheckDuration());
+//        Long millisec = minutes *60*1000;
+//        MyCount counter = new MyCount(millisec, 1000);
+//        counter.start();
         if(baseClass.isTabletDevice(this))
         {
             aq.id(R.id.BaseLayout).background(R.drawable.background_tablet);
@@ -54,33 +53,16 @@ static  TextView language;AQuery aq;int open;static PopupWindow popupWindow;
         {
             aq.id(R.id.BaseLayout).background(R.drawable.background_simple);
         }
-
-//        if (alarmManager!= null) {
-//            alarmManager.cancel(PendingIntent
-//                    .getBroadcast(getApplicationContext(), 1, intentAlarm,
-//                            PendingIntent.FLAG_UPDATE_CURRENT));
-//        }
-        newAlarmTime = Calendar.getInstance();
-        alarmManager = (AlarmManager) getApplicationContext()
-                .getSystemService(Context.ALARM_SERVICE);
-        intentAlarm = new Intent(getApplicationContext(), AlarmReceiver.class);
-
-        alarmManager.set(AlarmManager.RTC_WAKEUP, newAlarmTime
-                .getTimeInMillis() + 5*60*60*24*1000,PendingIntent
-                .getBroadcast(getApplicationContext(), 1, intentAlarm,
-                        PendingIntent.FLAG_UPDATE_CURRENT));
-
         language = (TextView) findViewById(R.id.select_language);
         searchView = (SearchView) findViewById(R.id.search);
         open=0;
-        //CheckDuration();
-       searchView.setOnSearchClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View v) {
-               language.setVisibility(View.GONE);
-               open = 1;
-           }
-       });
+        searchView.setOnSearchClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                language.setVisibility(View.GONE);
+                open = 1;
+            }
+        });
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
@@ -185,40 +167,28 @@ static  TextView language;AQuery aq;int open;static PopupWindow popupWindow;
                             .newinstance()).commit();
         }
     }
-    int counter;Long Duration;
-//    private void CheckDuration()
-//    {
-//       Long duration = baseClass.getCheckDuration();
-//        Duration =  duration * 1000 * 60;
-//        counter=0;
-//        final Handler handler=new Handler();
-//        final Runnable r = new Runnable()
-//            {
-//                public void run()
-//                {
-//                    if(counter==0) {
-//                        try {
-//                            counter++;
-//                            FragmentManager fm = getFragmentManager();
-//                            for (int i = 0; i < fm.getBackStackEntryCount(); ++i) {
-//                                fm.popBackStack();
-//                            }
-//                            baseClass.clearSharedPrefs();
-//                            startActivity(new Intent(BaseActivity.this, LoginActivity.class));
-//                            Intent broadcastIntent = new Intent();
-//                            broadcastIntent
-//                                    .setAction("co.vector.javantube");
-//                            LocalBroadcastManager.getInstance(BaseActivity.this).sendBroadcast(broadcastIntent);
-//                            BaseActivity.this.finish();
-//                        } catch (Exception e) {
-//                        }
-//                    }
-//                    handler.postDelayed(this, Duration);
-//            }
-//        };
-//        handler.postDelayed(r, Duration);
+//    public class MyCount extends CountDownTimer {
 //
+//        public MyCount(long millisInFuture, long countDownInterval) {
+//            super(millisInFuture, countDownInterval);
+//        }
+//
+//        @Override
+//        public void onFinish() {
+//            baseClass.clearSharedPrefs();
+//            startActivity(new Intent(BaseActivity.this, LoginActivity.class));
+//            Intent broadcastIntent = new Intent();
+//            broadcastIntent
+//                    .setAction("co.vector.itube");
+//            LocalBroadcastManager.getInstance(BaseActivity.this).sendBroadcast(broadcastIntent);
+//            BaseActivity.this.finish();
+//        }
+//
+//        @Override
+//        public void onTick(long millisUntilFinished) {
+//        }
 //    }
+
     @Override
     public void onBackPressed() {
         if(this.getFragmentManager().getBackStackEntryCount()==0) {
@@ -240,6 +210,7 @@ static  TextView language;AQuery aq;int open;static PopupWindow popupWindow;
     public void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         receiver = null;
+
         super.onDestroy();
     }
 }

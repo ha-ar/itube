@@ -36,6 +36,7 @@ public class LoginActivity extends Activity  {
         else {
             setContentView(R.layout.activity_login);
         }
+
         startService(new Intent(getApplicationContext(), BillingService.class));
         BillingHelper.setCompletedHandler(mTransactionHandler);
 
@@ -90,6 +91,7 @@ public class LoginActivity extends Activity  {
                startActivity(new Intent(LoginActivity.this,SignupActivity.class));
             }
         });
+
     }
 
     public void ConfirmLogin(Object caller, Object model) {

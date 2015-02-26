@@ -10,14 +10,18 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
 
+import com.androidquery.AQuery;
+
 import java.util.ArrayList;
 
 /**
  * Created by android on 11/17/14.
  */
 public class CategoryFragment extends Fragment {
-    private ArrayList<ClipData.Item> gridArray = new ArrayList<ClipData.Item>();
-    private BaseClass baseClass;
+    AQuery aq;
+    ArrayList<ClipData.Item> gridArray = new ArrayList<ClipData.Item>();
+    View rootView;
+    BaseClass baseClass;
     static GridView list_Category;
     public static CategoryAdapter CategoryAdapter;
 
@@ -39,7 +43,6 @@ public class CategoryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         baseClass =((BaseClass) getActivity().getApplicationContext());
-        View rootView;
         if(baseClass.isTabletDevice(getActivity()))
         {
             rootView = inflater.inflate(R.layout.fragment_category_tablet,
@@ -49,6 +52,7 @@ public class CategoryFragment extends Fragment {
             rootView = inflater.inflate(R.layout.layout_gridcategory,
                     container, false);
         }
+        aq = new AQuery(getActivity(),rootView);
         BaseActivity.language.setText("Select Category");
         list_Category = (GridView) rootView.findViewById(R.id.gridView_category);
         list_Category.setOnItemClickListener(new AdapterView.OnItemClickListener() {

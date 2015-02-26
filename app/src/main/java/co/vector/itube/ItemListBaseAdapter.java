@@ -49,8 +49,6 @@ public class ItemListBaseAdapter extends ArrayAdapter<ItemDetails> {
             convertView = inflater.inflate(layoutId, parent, false);
             holder = new ViewHolder();
             holder.txt_Name = (TextView) convertView.findViewById(R.id.title);
-            holder.txt_Author = (TextView) convertView.findViewById(R.id.author);
-            holder.txt_viewer = (TextView) convertView.findViewById(R.id.viewer);
             holder.txt_duration = (TextView) convertView.findViewById(R.id.duration);
             holder.dropDown = (ImageView) convertView.findViewById(R.id.drop_menu);
 
@@ -61,14 +59,9 @@ public class ItemListBaseAdapter extends ArrayAdapter<ItemDetails> {
         AQuery aq = new AQuery(convertView);
         try {
             String time = null;
-            Long relativeTime = null;
-            relativeTime= BaseActivity.baseClass.getTimeStampToMilli(itemDetailsrrayList.get(position).getUploaddate());
-            String finaltime = BaseActivity.baseClass.TimeAgo(relativeTime/1000);
             time = itemDetailsrrayList.get(position).getduration();
             String splitedtiem = CalculateTime(Long.parseLong(time) * 1000);
             holder.txt_Name.setText(itemDetailsrrayList.get(position).getName());
-            holder.txt_Author.setText(itemDetailsrrayList.get(position).getAuthor());
-            holder.txt_viewer.setText( finaltime+ " . " + String.valueOf(itemDetailsrrayList.get(position).getViewer()) + " Views");
             holder.txt_duration.setText(splitedtiem);
         }catch (NullPointerException npe){}
         ImageOptions options = new ImageOptions();
@@ -94,8 +87,6 @@ public class ItemListBaseAdapter extends ArrayAdapter<ItemDetails> {
 
     static class ViewHolder {
         TextView txt_Name;
-        TextView txt_Author;
-        TextView txt_viewer;
         TextView txt_duration;
         ImageView dropDown;
     }

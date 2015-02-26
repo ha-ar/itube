@@ -112,7 +112,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Watch over 100 million Movies \n آى  تیوب با بیش از صد میلیون فیلم و شو..."
+            android:text="Watch over 100 million Movies \n آى ویڈیو با بیش از صد میلیون فیلم و شو..."
             android:id="@+id/textView"
             android:lines="2"
             android:ellipsize="end"

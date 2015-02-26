@@ -121,45 +121,26 @@
                 android:layout_width="match_parent"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-
-                android:background="@android:color/white"
+                android:background="@android:color/transparent"
                 android:layout_height="fill_parent">
                 <TextView
                     android:id="@+id/liner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="20sp"
+                    android:background="@android:color/white"
                     android:lines="1"
                     android:padding="5dp"
-                    android:layout_margin="3dp"
+                    android:layout_marginBottom="3dp"
                     android:text="SUGGESTIONS"
                     android:ellipsize="end" />
                 <GridView
                     android:layout_width="wrap_content"
                     android:layout_below="@+id/liner"
-                    android:background="@android:color/white"
+                    android:background="@android:color/transparent"
                     android:layout_height="wrap_content"
                     android:id="@+id/suggestion_listView" />
-                <LinearLayout
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:id="@+id/footer"
-                    android:visibility="gone"
-                    android:background="@android:color/white"
-                    android:layout_alignParentBottom="true"
-                    android:orientation="horizontal"
-                    android:gravity="center">
 
-                    <TextView
-                        android:text="Show More..."
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/black"
-                        android:gravity="center_vertical"
-                        android:textStyle="bold" />
-                </LinearLayout>
             </RelativeLayout>
         </LinearLayout>
     </LinearLayout>

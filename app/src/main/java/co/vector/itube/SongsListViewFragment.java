@@ -27,6 +27,7 @@ import com.androidquery.AQuery;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import DB.DaoMaster;
 import DB.DaoSession;
@@ -44,10 +45,10 @@ import services.GetByAllCategoryService;
  * Created by android on 11/17/14.
  */
 public class SongsListViewFragment extends Fragment {
-    BaseClass baseClass;List<String> list;
+    BaseClass baseClass;List<String> list;int total_count;
     AQuery aq;static PopupWindow popupWindow;
     public static SongListViewAdapter songListViewAdapter;
-    View rootView,footerView;static  int SelectedId;  String popUpContents[];static String Query;
+    View rootView;static  int SelectedId;  String popUpContents[];static String Query;
     static GridView list_songs;static int index;
     GetByAllCategoryService obj;
 
@@ -66,7 +67,25 @@ public class SongsListViewFragment extends Fragment {
         rootView = inflater.inflate(R.layout.layout_songslistview,
                 container, false);
         list_songs = (GridView) rootView.findViewById(R.id.listView);
-        footerView = (LinearLayout) rootView.findViewById(R.id.footer);
+        list_songs.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to your AdapterView
+                index=page;
+                if(baseClass.getDataBy().equalsIgnoreCase("Category")) {
+                    obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), baseClass.getAUTH_TOKEN(), index, true,
+                            new CallBack(SongsListViewFragment.this, "GetAllBy" + baseClass.getCategory() + "More"));
+                }
+                else
+                {
+                    obj.getbysearch(Query, baseClass.getAUTH_TOKEN(), index, true,
+                            new CallBack(SongsListViewFragment.this, "GetAllBySearchMore"));
+                }
+                // or customLoadMoreDataFromApi(totalItemsCount);
+            }
+        });
+        //footerView = (LinearLayout) rootView.findViewById(R.id.footer);
         if(!baseClass.isTabletDevice(getActivity()))
         {
             list_songs.setNumColumns(2);
@@ -84,7 +103,6 @@ public class SongsListViewFragment extends Fragment {
                 try {
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(BaseActivity.searchView.getWindowToken(), 0);
-                    footerView.setVisibility(View.GONE);
                 Query = query;
                 obj = new GetByAllCategoryService(getActivity());
                 obj.getbysearch(query, baseClass.getAUTH_TOKEN(), index, true,
@@ -114,26 +132,26 @@ public class SongsListViewFragment extends Fragment {
         obj.getbycategory(baseClass.getNewCategory(),baseClass.getDuration(), baseClass.getAUTH_TOKEN(),index,true,
                 new CallBack(this, "GetAllBy" + baseClass.getCategory()));
 
-        footerView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                index++;
-                try{
-                    footerView.setVisibility(View.GONE);
-                }catch (NullPointerException e){}
-                obj = new GetByAllCategoryService(getActivity());
-                if(baseClass.getDataBy().equalsIgnoreCase("Category")) {
-                    obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), baseClass.getAUTH_TOKEN(), index, true,
-                            new CallBack(SongsListViewFragment.this, "GetAllBy" + baseClass.getCategory() + "More"));
-                }
-                else
-                {
-                    obj.getbysearch(Query, baseClass.getAUTH_TOKEN(), index, true,
-                            new CallBack(SongsListViewFragment.this, "GetAllBySearchMore"));
-                }
-
-            }
-        });
+//        footerView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                index++;
+//                try{
+//                    footerView.setVisibility(View.GONE);
+//                }catch (NullPointerException e){}
+//                obj = new GetByAllCategoryService(getActivity());
+//                if(baseClass.getDataBy().equalsIgnoreCase("Category")) {
+//                    obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), baseClass.getAUTH_TOKEN(), index, true,
+//                            new CallBack(SongsListViewFragment.this, "GetAllBy" + baseClass.getCategory() + "More"));
+//                }
+//                else
+//                {
+//                    obj.getbysearch(Query, baseClass.getAUTH_TOKEN(), index, true,
+//                            new CallBack(SongsListViewFragment.this, "GetAllBySearchMore"));
+//                }
+//
+//            }
+//        });
         list_songs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -159,12 +177,11 @@ public class SongsListViewFragment extends Fragment {
             ArrayList<ItemDetails> image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             list_songs.setAdapter(songListViewAdapter);
             if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
-            aq.id(R.id.total_results).text("Total Results: Over 1M");
+            aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
-            aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
+            aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
 
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
@@ -179,12 +196,11 @@ public class SongsListViewFragment extends Fragment {
             ArrayList<ItemDetails> image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             songListViewAdapter.notifyDataSetChanged();
             if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
-                aq.id(R.id.total_results).text("Total Results: Over 1Mil");
+                aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
-                aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
+                aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
             Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
@@ -198,12 +214,11 @@ public class SongsListViewFragment extends Fragment {
                 ArrayList<ItemDetails> image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
                 list_songs.setAdapter(songListViewAdapter);
             if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
-                aq.id(R.id.total_results).text("Total Results: Over 1Mil");
+                aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
-                aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
+                aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
             Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
@@ -217,12 +232,11 @@ public class SongsListViewFragment extends Fragment {
                 ArrayList<ItemDetails> image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
                 songListViewAdapter.notifyDataSetChanged();
             if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
-                aq.id(R.id.total_results).text("Total Results: Over 1Mil");
+                aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
-                aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
+                aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
             Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
@@ -277,12 +291,11 @@ public class SongsListViewFragment extends Fragment {
 
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             list_songs.setAdapter(songListViewAdapter);
             if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
-                aq.id(R.id.total_results).text("Total Results: Over 1Mil");
+                aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
-                aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
+                aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
             Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
@@ -296,12 +309,11 @@ public class SongsListViewFragment extends Fragment {
             ArrayList<ItemDetails> image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             songListViewAdapter.notifyDataSetChanged();
             if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
-                aq.id(R.id.total_results).text("Total Results: Over 1Mil");
+                aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
-                aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
+                aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
             Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
@@ -313,12 +325,11 @@ public class SongsListViewFragment extends Fragment {
             ArrayList<ItemDetails> image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             list_songs.setAdapter(songListViewAdapter);
             if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
-                aq.id(R.id.total_results).text("Total Results: Over 1Mil");
+                aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
-                aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
+                aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
             Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
@@ -332,12 +343,11 @@ public class SongsListViewFragment extends Fragment {
             ArrayList<ItemDetails> image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             songListViewAdapter.notifyDataSetChanged();
             if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
-                aq.id(R.id.total_results).text("Total Results: Over 1Mil");
+                aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
-                aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
+                aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
             Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
@@ -350,12 +360,11 @@ public class SongsListViewFragment extends Fragment {
             ArrayList<ItemDetails> image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             list_songs.setAdapter(songListViewAdapter);
             if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
-                aq.id(R.id.total_results).text("Total Results: Over 1Mil");
+                aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
-                aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
+                aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
             Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
@@ -369,12 +378,11 @@ public class SongsListViewFragment extends Fragment {
             ArrayList<ItemDetails> image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             songListViewAdapter.notifyDataSetChanged();
             if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
-                aq.id(R.id.total_results).text("Total Results: Over 1Mil");
+                aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
-                aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
+                aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
             Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
@@ -468,4 +476,24 @@ Log.e("Size",String.valueOf(GetAllByCategoryModel.getInstance().category.videos.
         super.onDestroy();
         BaseActivity.language.setText("Select Category");
     }
+//    public String CalculateTotalResults()
+//    {
+//        StringBuilder stringBuilder= new StringBuilder();
+//        String total_count =  GetAllByCategoryModel.getInstance().category.total_result_count+"00";
+//        char[] arr = total_count.toCharArray();
+//        if(total_count.length() == 8) {
+//            stringBuilder.append(arr[0]);
+//            stringBuilder.append(arr[1]);
+//            stringBuilder.append(" Mil");
+//            return stringBuilder.toString();
+//        }
+//        else if(total_count.length() == 7) {
+//            stringBuilder.append(arr[0]);
+//            stringBuilder.append(" Mil");
+//            return stringBuilder.toString();
+//        }
+//        else
+//            return total_count;
+//
+//    }
 }

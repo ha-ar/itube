@@ -10,12 +10,10 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.CountDownTimer;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -23,7 +21,6 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -72,7 +69,7 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
     private boolean fullscreen;
     String popUpContents[];
     static PopupWindow popupWindow;
-    private View otherView, footerView;
+    private View otherView;
     int index;
     String videoId, videoTitle, videoPlayerlink, videoDuration, videoViewer, videothumbnail;
     GetByAllCategoryService obj;
@@ -98,19 +95,20 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             listRelative= (RelativeLayout) findViewById(R.id.listsection1);
             aq.id(R.id.baselayout).background(R.drawable.background_simple);
         }
-        footerView = (LinearLayout) findViewById(R.id.footer);
+       // footerView = (LinearLayout) findViewById(R.id.footer);
         Animation fadeOutAnimation = AnimationUtils.loadAnimation(activity, R.anim.fade_out);
         aq.id(R.id.animation).animate(fadeOutAnimation);
-        SetDuration();
+        MyCount counter = new MyCount(3000, 1000);
+        counter.start();
         baseClass = ((BaseClass) getApplicationContext());
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("co.vector.javantube");
+        intentFilter.addAction("co.vector.itube");
         LocalBroadcastManager.getInstance(this).registerReceiver(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 Log.d("onReceive", "Logout in progress");
                 //At this point we should start the login activity and finish this one.
-                finish();
+                YoutubeBaseActivity.this.finish();
             }
         }, intentFilter);
         otherView = findViewById(R.id.otherview);
@@ -175,6 +173,20 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             }
         });
         list = (GridView) findViewById(R.id.suggestion_listView);
+        list.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+                index=page;
+                obj = new GetByAllCategoryService(activity);
+                if (baseClass.getDataBy().equalsIgnoreCase("Category")) {
+                    obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), baseClass.getAUTH_TOKEN(), index, true,
+                            new CallBack(activity, "GetAllBy" + baseClass.getCategory() + "More"));
+                } else {
+                    obj.getbysearch(SongsListViewFragment.Query, baseClass.getAUTH_TOKEN(), index, true,
+                            new CallBack(activity, "GetAllBySearchMore"));
+                }
+            }
+        });
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -211,27 +223,26 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             ArrayList<ItemDetails> image_details = GetSearchResults();
             leftItemListBaseAdapter = new LeftItemListBaseAdapter(
                     activity,R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             list.setAdapter(leftItemListBaseAdapter);
             index = SongsListViewFragment.index;
-            footerView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    index++;
-                    try {
-                        footerView.setVisibility(View.GONE);
-                    } catch (NullPointerException e) {
-                    }
-                    obj = new GetByAllCategoryService(activity);
-                    if (baseClass.getDataBy().equalsIgnoreCase("Category")) {
-                        obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), baseClass.getAUTH_TOKEN(), index, true,
-                                new CallBack(activity, "GetAllBy" + baseClass.getCategory() + "More"));
-                    } else {
-                        obj.getbysearch(SongsListViewFragment.Query, baseClass.getAUTH_TOKEN(), index, true,
-                                new CallBack(activity, "GetAllBySearchMore"));
-                    }
-                }
-            });
+//            footerView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    index++;
+//                    try {
+//                        footerView.setVisibility(View.GONE);
+//                    } catch (NullPointerException e) {
+//                    }
+//                    obj = new GetByAllCategoryService(activity);
+//                    if (baseClass.getDataBy().equalsIgnoreCase("Category")) {
+//                        obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), baseClass.getAUTH_TOKEN(), index, true,
+//                                new CallBack(activity, "GetAllBy" + baseClass.getCategory() + "More"));
+//                    } else {
+//                        obj.getbysearch(SongsListViewFragment.Query, baseClass.getAUTH_TOKEN(), index, true,
+//                                new CallBack(activity, "GetAllBySearchMore"));
+//                    }
+//                }
+//            });
 
         } catch (NullPointerException e) {
         }
@@ -256,7 +267,6 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             ArrayList<ItemDetails> image_details = GetSearchResults();
             leftItemListBaseAdapter = new LeftItemListBaseAdapter(
                     this,R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             leftItemListBaseAdapter.notifyDataSetChanged();
             aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
         } else {
@@ -273,7 +283,6 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             ArrayList<ItemDetails> image_details = GetSearchResults();
             leftItemListBaseAdapter = new LeftItemListBaseAdapter(
                     this,R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             leftItemListBaseAdapter.notifyDataSetChanged();
             aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
         } else {
@@ -290,7 +299,6 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             ArrayList<ItemDetails> image_details = GetSearchResults();
             leftItemListBaseAdapter = new LeftItemListBaseAdapter(
                     this,R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             leftItemListBaseAdapter.notifyDataSetChanged();
             aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
         } else {
@@ -307,7 +315,6 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             ArrayList<ItemDetails> image_details = GetSearchResults();
             leftItemListBaseAdapter = new LeftItemListBaseAdapter(
                     this,R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             leftItemListBaseAdapter.notifyDataSetChanged();
             aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
         } else {
@@ -324,7 +331,6 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             ArrayList<ItemDetails> image_details = GetSearchResults();
             leftItemListBaseAdapter = new LeftItemListBaseAdapter(
                     this,R.layout.layout_songs_list_maker, image_details);
-            footerView.setVisibility(View.VISIBLE);
             leftItemListBaseAdapter.notifyDataSetChanged();
             aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
         } else {
@@ -422,18 +428,22 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
     }
 
     private boolean isPlaylistVideoIdExist() {
+        List<Playlist> temp = new ArrayList<Playlist>();
+        try{
+            DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
+                    activity, "javantube.sqlite", null);
+            SQLiteDatabase ex_db = ex_database_helper_obj.getReadableDatabase();
+            DaoMaster daoMaster = new DaoMaster(ex_db);
+            DaoSession daoSession = daoMaster.newSession();
 
-        DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
-                activity, "javantube.sqlite", null);
-        SQLiteDatabase ex_db = ex_database_helper_obj.getReadableDatabase();
-        DaoMaster daoMaster = new DaoMaster(ex_db);
-        DaoSession daoSession = daoMaster.newSession();
-
-        PlaylistDao playlistDao = daoSession.getPlaylistDao();
-        List<Playlist> temp = playlistDao.queryBuilder().list();
-        daoSession.clear();
-        ex_db.close();
-        ex_database_helper_obj.close();
+            PlaylistDao playlistDao = daoSession.getPlaylistDao();
+            temp = playlistDao.queryBuilder().list();
+            daoSession.clear();
+            ex_db.close();
+            ex_database_helper_obj.close();
+        }catch (Exception e){
+            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
+        }
 
         for (int loop = 0; loop < temp.size(); loop++) {
             if (temp.get(loop).getVideoId().equalsIgnoreCase(baseClass.getVideoId())) {
@@ -451,17 +461,22 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
 
     private boolean isFavoriteVideoIdExist() {
         int status = 0;
-        DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
-                activity, "javantube.sqlite", null);
-        SQLiteDatabase ex_db = ex_database_helper_obj.getReadableDatabase();
-        DaoMaster daoMaster = new DaoMaster(ex_db);
-        DaoSession daoSession = daoMaster.newSession();
+        List<Favorite> temp = new ArrayList<Favorite>();
+        try {
+            DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
+                    activity, "javantube.sqlite", null);
+            SQLiteDatabase ex_db = ex_database_helper_obj.getReadableDatabase();
+            DaoMaster daoMaster = new DaoMaster(ex_db);
+            DaoSession daoSession = daoMaster.newSession();
 
-        FavoriteDao favoriteDao = daoSession.getFavoriteDao();
-        List<Favorite> temp = favoriteDao.queryBuilder().list();
-        daoSession.clear();
-        ex_db.close();
-        ex_database_helper_obj.close();
+            FavoriteDao favoriteDao = daoSession.getFavoriteDao();
+            temp = favoriteDao.queryBuilder().list();
+            daoSession.clear();
+            ex_db.close();
+            ex_database_helper_obj.close();
+        }catch (Exception e){
+            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
+        }
 
         for (int loop = 0; loop < temp.size(); loop++) {
             if (temp.get(loop).getVideoId().equalsIgnoreCase(baseClass.getVideoId())) {
@@ -478,64 +493,80 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
     }
 
     public void AddedSongToPlaylist() {
-        DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
-                activity, "javantube.sqlite", null);
-        SQLiteDatabase ex_db = ex_database_helper_obj
-                .getWritableDatabase();
-        DaoMaster daoMaster = new DaoMaster(ex_db);
-        DaoSession daoSession = daoMaster.newSession();
+        try {
+            DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
+                    activity, "javantube.sqlite", null);
+            SQLiteDatabase ex_db = ex_database_helper_obj
+                    .getWritableDatabase();
+            DaoMaster daoMaster = new DaoMaster(ex_db);
+            DaoSession daoSession = daoMaster.newSession();
 
-        PlaylistDao playlistDao = daoSession.getPlaylistDao();
-        Playlist playlist = new Playlist(baseClass.getVideoId(), baseClass.getVideoTitle(), baseClass.getVideoDurtion(),
-                baseClass.getVideoViewer(), baseClass.getVideoUploadDate(), baseClass.getVideoAuthor(), baseClass.getVideoThumbnail());
-        playlistDao.insert(playlist);
-        daoSession.clear();
-        ex_db.close();
-        ex_database_helper_obj.close();
+            PlaylistDao playlistDao = daoSession.getPlaylistDao();
+            Playlist playlist = new Playlist(baseClass.getVideoId(), baseClass.getVideoTitle(), baseClass.getVideoDurtion(),
+                    baseClass.getVideoViewer(), baseClass.getVideoUploadDate(), baseClass.getVideoAuthor(), baseClass.getVideoThumbnail());
+            playlistDao.insert(playlist);
+            daoSession.clear();
+            ex_db.close();
+            ex_database_helper_obj.close();
+        }catch (Exception e){
+            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
+        }
     }
 
     public void DeletedSongFromPlaylist() {
-        DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
-                activity, "javantube.sqlite", null);
-        SQLiteDatabase ex_db = ex_database_helper_obj
-                .getWritableDatabase();
-        DaoMaster daoMaster = new DaoMaster(ex_db);
-        DaoSession daoSession = daoMaster.newSession();
-        PlaylistDao playlistDao = daoSession.getPlaylistDao();
-        playlistDao.deleteByKey(baseClass.getVideoId());
-        daoSession.clear();
-        ex_db.close();
-        ex_database_helper_obj.close();
+        try {
+            DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
+                    activity, "javantube.sqlite", null);
+            SQLiteDatabase ex_db = ex_database_helper_obj
+                    .getWritableDatabase();
+            DaoMaster daoMaster = new DaoMaster(ex_db);
+            DaoSession daoSession = daoMaster.newSession();
+            PlaylistDao playlistDao = daoSession.getPlaylistDao();
+            playlistDao.deleteByKey(baseClass.getVideoId());
+            daoSession.clear();
+            ex_db.close();
+            ex_database_helper_obj.close();
+        }catch (Exception e){
+            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
+        }
     }
 
     public void AddedSongToFavorite() {
-        DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
-                activity, "javantube.sqlite", null);
-        SQLiteDatabase ex_db = ex_database_helper_obj
-                .getWritableDatabase();
-        DaoMaster daoMaster = new DaoMaster(ex_db);
-        DaoSession daoSession = daoMaster.newSession();
-        FavoriteDao favoriteDao = daoSession.getFavoriteDao();
-        Favorite favorite = new Favorite(baseClass.getVideoId(), baseClass.getVideoTitle(), baseClass.getVideoDurtion(),
-                baseClass.getVideoViewer(), baseClass.getVideoUploadDate(), baseClass.getVideoAuthor(), baseClass.getVideoThumbnail());
-        favoriteDao.insert(favorite);
-        daoSession.clear();
-        ex_db.close();
-        ex_database_helper_obj.close();
+        try {
+            DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
+                    activity, "javantube.sqlite", null);
+            SQLiteDatabase ex_db = ex_database_helper_obj
+                    .getWritableDatabase();
+            DaoMaster daoMaster = new DaoMaster(ex_db);
+            DaoSession daoSession = daoMaster.newSession();
+            FavoriteDao favoriteDao = daoSession.getFavoriteDao();
+            Favorite favorite = new Favorite(baseClass.getVideoId(), baseClass.getVideoTitle(), baseClass.getVideoDurtion(),
+                    baseClass.getVideoViewer(), baseClass.getVideoUploadDate(), baseClass.getVideoAuthor(), baseClass.getVideoThumbnail());
+            favoriteDao.insert(favorite);
+            daoSession.clear();
+            ex_db.close();
+            ex_database_helper_obj.close();
+        }catch (Exception e){
+            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
+        }
     }
 
     public void DeletedSongFromFavorite() {
-        DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
-                activity, "javantube.sqlite", null);
-        SQLiteDatabase ex_db = ex_database_helper_obj
-                .getWritableDatabase();
-        DaoMaster daoMaster = new DaoMaster(ex_db);
-        DaoSession daoSession = daoMaster.newSession();
-        FavoriteDao favoriteDao = daoSession.getFavoriteDao();
-        favoriteDao.deleteByKey(baseClass.getVideoId());
-        daoSession.clear();
-        ex_db.close();
-        ex_database_helper_obj.close();
+        try {
+            DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
+                    activity, "javantube.sqlite", null);
+            SQLiteDatabase ex_db = ex_database_helper_obj
+                    .getWritableDatabase();
+            DaoMaster daoMaster = new DaoMaster(ex_db);
+            DaoSession daoSession = daoMaster.newSession();
+            FavoriteDao favoriteDao = daoSession.getFavoriteDao();
+            favoriteDao.deleteByKey(baseClass.getVideoId());
+            daoSession.clear();
+            ex_db.close();
+            ex_database_helper_obj.close();
+        }catch (Exception e){
+            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
+        }
     }
 
     @Override
@@ -829,28 +860,20 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             baseClass.setYOUTUBE(null);
         }
     }
-    int counter;Long Duration;
-    public void SetDuration()
-    {
-        Duration =  3000l;
-        counter=0;
-        final Handler handler=new Handler();
-        final Runnable r = new Runnable()
-        {
-            public void run()
-            {
-                if(counter==0) {
-                    try {
-                        counter++;
-                        aq.id(R.id.animation_layout).visibility(View.GONE);
-                        aq.id(R.id.youtube).visibility(View.VISIBLE);
-                    } catch (Exception e) {
-                    }
-                }
-                handler.postDelayed(this, Duration);
-            }
-        };
-        handler.postDelayed(r, Duration);
+    public class MyCount extends CountDownTimer {
 
+        public MyCount(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onFinish() {
+            aq.id(R.id.animation_layout).visibility(View.GONE);
+            aq.id(R.id.youtube).visibility(View.VISIBLE);
+        }
+
+        @Override
+        public void onTick(long millisUntilFinished) {
+        }
     }
 }
