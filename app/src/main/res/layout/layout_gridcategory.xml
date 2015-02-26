@@ -1,0 +1,23 @@
+<RelativeLayout xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="10dp"
+    android:paddingBottom="10dp"
+    android:paddingRight="10dp"
+    tools:context="co.vector.sportsevents.MainActivity$PlaceholderFragment" >
+
+
+    <GridView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/gridView_category"
+        android:numColumns="2"
+        android:padding="10dp"
+        android:rowCount="2"
+        android:scrollbars="none"
+        android:scrollbarSize="0dp"
+        android:columnWidth="150dp"
+        android:gravity="center"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>

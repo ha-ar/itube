@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@drawable/background_simple"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+    android:layout_width="match_parent"
+        android:id="@+id/layout_home"
+    android:layout_height="50dp">
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/home"
+            android:id="@+id/home_image" />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Home"
+        android:textColor="#9eded7"
+        android:id="@+id/home"
+        android:paddingLeft="20dp"
+        android:layout_gravity="center_vertical"/>
+</LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:background="#88676767"
+        android:layout_height="1dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/layout_category"
+        android:layout_height="50dp">
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/category"
+            android:id="@+id/category_image" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Categories"
+            android:textColor="#9eded7"
+            android:id="@+id/category"
+            android:paddingLeft="20dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:background="#88676767"
+        android:layout_height="1dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/layout_favorite"
+        android:layout_height="50dp">
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/favorited"
+            android:id="@+id/favorite_image" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Favorites"
+            android:textColor="#9eded7"
+            android:id="@+id/favorite"
+            android:paddingLeft="20dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:background="#88676767"
+        android:layout_height="1dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/layout_playlist"
+        android:layout_height="50dp">
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/play"
+            android:id="@+id/playlist_image" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Playlist"
+            android:textColor="#9eded7"
+            android:id="@+id/playlist"
+            android:paddingLeft="20dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:background="#88676767"
+        android:layout_height="1dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/layout_subscription"
+        android:layout_height="50dp">
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/cart"
+            android:id="@+id/image_subscription" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Get Subscription"
+            android:textColor="#9eded7"
+            android:id="@+id/subscription"
+            android:paddingLeft="20dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:background="#88676767"
+        android:layout_height="1dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_height="170dp">
+        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:id="@+id/layout_logout"
+        android:layout_height="50dp">
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/power"
+            android:id="@+id/logout_image" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Logout"
+            android:textColor="#9eded7"
+            android:id="@+id/logout"
+            android:paddingLeft="20dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:background="#88676767"
+        android:layout_height="1dp" />
+</LinearLayout>

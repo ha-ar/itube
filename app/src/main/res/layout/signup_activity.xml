@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:paddingTop="20dp"
+    android:background="@drawable/background_simple"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    <ScrollView android:id="@+id/login_form"
+        android:layout_width="match_parent"
+        android:paddingLeft="25dp"
+        android:paddingRight="25dp"
+        android:scrollbars="none"
+        android:layout_height="match_parent">
+
+    <LinearLayout android:id="@+id/email_login_form"
+        android:layout_width="match_parent"
+        android:layout_marginTop="20dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <ImageView
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:id="@+id/logo"
+            android:background="@drawable/logo"
+            android:layout_gravity="center_horizontal" />
+    <EditText
+        android:id="@+id/email"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:inputType="textEmailAddress"
+        android:maxLines="1"
+        android:drawableRight="@drawable/user"
+        android:textCursorDrawable="@null"
+        android:textColorHint="@android:color/white"
+        android:textColor="@android:color/white"
+        android:paddingLeft="15dp"
+        android:textStyle="bold"
+        android:completionHint="Email"
+        android:background ="@drawable/roundable_corner"
+        android:layout_marginTop="20dp"
+        android:hint="Email"
+        android:singleLine="true"/>
+
+    <EditText
+        android:id="@+id/password"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="5dp"
+        android:paddingLeft="15dp"
+        android:drawableRight="@drawable/lock"
+        android:textColorHint="@android:color/white"
+        android:textCursorDrawable="@null"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:background ="@drawable/roundable_corner"
+        android:inputType="textPassword"
+        android:imeActionId="@+id/login"
+        android:imeOptions="actionUnspecified"
+        android:maxLines="1"
+        android:hint="Password"
+        android:singleLine="true"/>
+
+    <EditText
+        android:id="@+id/confirm_password"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="5dp"
+        android:paddingLeft="15dp"
+        android:textCursorDrawable="@null"
+        android:textColor="@android:color/white"
+        android:textStyle="bold"
+        android:drawableRight="@drawable/lock"
+        android:background ="@drawable/roundable_corner"
+        android:inputType="textPassword"
+        android:imeActionId="@+id/login"
+        android:imeOptions="actionUnspecified"
+        android:maxLines="1"
+        android:textColorHint="@android:color/white"
+        android:singleLine="true"
+        android:hint="Comfirm Password"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/signup"
+        android:background="@drawable/register"
+        android:layout_below="@+id/confirm_password"
+        android:layout_marginTop="40dp"
+        android:layout_centerHorizontal="true" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp">
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Watch over 100 million Movies \n آى تیوب با بیش از صد میلیون فیلم و شو..."
+            android:id="@+id/textView"
+            android:lines="2"
+            android:ellipsize="end"
+            android:textStyle="bold"
+            android:textSize="19sp"
+            android:gravity="center|center_horizontal"
+            android:layout_gravity="center_horizontal" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="30dp">
+        </LinearLayout>
+</LinearLayout>
+    </ScrollView>
+
+</RelativeLayout>
