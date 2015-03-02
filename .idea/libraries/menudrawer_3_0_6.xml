@@ -1,8 +1,13 @@
 <component name="libraryTable">
   <library name="menudrawer-3.0.6">
     <CLASSES>
+<<<<<<< HEAD
       <root url="file://$PROJECT_DIR$/app/build/intermediates/exploded-aar/net.simonvt.menudrawer/menudrawer/3.0.6/res" />
       <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/net.simonvt.menudrawer/menudrawer/3.0.6/classes.jar!/" />
+=======
+      <root url="jar://$PROJECT_DIR$/app/build/intermediates/exploded-aar/net.simonvt.menudrawer/menudrawer/3.0.6/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/app/build/intermediates/exploded-aar/net.simonvt.menudrawer/menudrawer/3.0.6/res" />
+>>>>>>> 3999c7c17bc027c8caa246d07a65c335eb91f941
     </CLASSES>
     <JAVADOC />
     <SOURCES />
