@@ -95,7 +95,7 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             listRelative= (RelativeLayout) findViewById(R.id.listsection1);
             aq.id(R.id.baselayout).background(R.drawable.background_simple);
         }
-       // footerView = (LinearLayout) findViewById(R.id.footer);
+        // footerView = (LinearLayout) findViewById(R.id.footer);
         Animation fadeOutAnimation = AnimationUtils.loadAnimation(activity, R.anim.fade_out);
         aq.id(R.id.animation).animate(fadeOutAnimation);
         MyCount counter = new MyCount(3000, 1000);
@@ -384,22 +384,20 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
                 }
             }
             if(position==1)
-            {
                 try {
                     AddedSongToFavorite();
                     Crouton.makeText(
                             activity,
                             "Video Added to Favorites.",
                             Style.CONFIRM).show();
-                    Log.e("ok3","ok");
-                }catch (Exception e){
+                    Log.e("ok3", "ok");
+                } catch (Exception e) {
                     Crouton.makeText(
                             activity,
                             "Video Already Added To Favorites.",
                             Style.ALERT).show();
-                    Log.e("ok4","ok");
+                    Log.e("ok4", "ok");
                 }
-            }
         }
     }
 
