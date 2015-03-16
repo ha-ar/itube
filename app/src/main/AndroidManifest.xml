@@ -55,8 +55,11 @@
         <activity
             android:theme="@android:style/Theme.Holo.NoActionBar"
             android:name=".BaseActivity"
+            android:exported="true"
             android:windowSoftInputMode="adjustPan|adjustResize"
             android:label="@string/app_name">
+
+
         </activity>
         <activity
             android:theme="@android:style/Theme.Holo.Light.NoActionBar"

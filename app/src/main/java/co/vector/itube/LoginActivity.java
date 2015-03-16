@@ -14,15 +14,18 @@ import android.widget.Button;
 
 import com.androidquery.AQuery;
 
+import Models.AdsMessage;
 import Models.UserModel;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import services.CallBack;
+import services.ExpiryUpdateService;
 import services.LoginService;
 
 public class LoginActivity extends Activity  {
     private static final String TAG = "Android BillingService";
     AQuery aq;
+    private String expiryUpdate = "43800";
 
     private BaseClass baseClass;
     @Override
@@ -40,10 +43,10 @@ public class LoginActivity extends Activity  {
         startService(new Intent(getApplicationContext(), BillingService.class));
         BillingHelper.setCompletedHandler(mTransactionHandler);
 
-        if(!baseClass.getAUTH_TOKEN().equalsIgnoreCase(""))
-        {
-            startActivity(new Intent(LoginActivity.this,BaseActivity.class));
-        }
+//        if(!baseClass.getAUTH_TOKEN().equalsIgnoreCase(""))
+//        {
+//            startActivity(new Intent(LoginActivity.this,BaseActivity.class));
+//        }
 
         final Button Register = (Button) findViewById(R.id.register_here);
         final Button Signin = (Button) findViewById(R.id.email_sign_in_button);
@@ -97,9 +100,10 @@ public class LoginActivity extends Activity  {
     public void ConfirmLogin(Object caller, Object model) {
         UserModel.getInstance().setList((UserModel) model);
         if (UserModel.getInstance().success.equalsIgnoreCase("true")) {
+            baseClass.setAUTH_TOKEN(UserModel.getInstance().auth_token);  //in case of expiry
             if (UserModel.getInstance().expire.equalsIgnoreCase("false")) {
-                baseClass.setAUTH_TOKEN(UserModel.getInstance().user.auth_token.toString());
-                baseClass.setCheckDuration(Long.parseLong(UserModel.getInstance().user.duration.toString()));
+                baseClass.setAUTH_TOKEN(UserModel.getInstance().user.auth_token);
+                baseClass.setCheckDuration(Long.parseLong(UserModel.getInstance().user.duration));
                 startActivity(new Intent(LoginActivity.this, BaseActivity.class));
                 LoginActivity.this.finish();
             } else {
@@ -127,15 +131,25 @@ public class LoginActivity extends Activity  {
         public void handleMessage(android.os.Message msg) {
             try {
                 Log.i(TAG, "Transaction complete");
-                Log.i(TAG, "Transaction status: " + BillingHelper.latestPurchase.purchaseState);
-                Log.i(TAG, "Item purchased is: " + BillingHelper.latestPurchase.productId);
-            }catch (NullPointerException e){}
+                ExpiryUpdateService obj = new ExpiryUpdateService(LoginActivity.this);
+                obj.expiryUpdate(expiryUpdate,true, baseClass.getAUTH_TOKEN(), new CallBack(LoginActivity.this, "expiryUpdate"));
+
+//                Log.i(TAG, "Transaction status: " + BillingHelper.latestPurchase.purchaseState);
+//                Log.i(TAG, "Item purchased is: " + BillingHelper.latestPurchase.productId);
+            }catch (NullPointerException e){
+                e.printStackTrace();
+            }
         };
 
     };
     public boolean isEmailValid(String email) {
-        //TODO: Replace this with your own logic
         return email.contains("@");
+    }
+
+    public void expiryUpdate(Object caller, Object model) {
+        AdsMessage.getInstance().setList((AdsMessage) model);
+
+        Crouton.makeText(LoginActivity.this, AdsMessage.getInstance().message, Style.INFO).show();
     }
 
     @Override

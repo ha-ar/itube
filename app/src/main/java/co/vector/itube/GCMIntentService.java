@@ -1,6 +1,7 @@
 package co.vector.itube;
 
 import android.app.IntentService;
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -52,7 +53,7 @@ public class GCMIntentService extends IntentService {
                 // This loop represents the service doing some work.
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
-                sendNotification("Received: " + extras.toString());
+                sendNotification(extras.getString("message"));
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }
@@ -68,20 +69,19 @@ public class GCMIntentService extends IntentService {
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent = PendingIntent.getActivity(this, 0,
-                new Intent(this, BaseActivity.class), 0);
+                new Intent(this, BaseActivity.class), PendingIntent.FLAG_CANCEL_CURRENT);
         //Define sound URI
         Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.logo)
-                        .setContentTitle("iTube")
+                        .setContentTitle("iVideo")
                         .setSound(soundUri)
+                        .setPriority(Notification.PRIORITY_MAX)
                         .setVibrate(new long[]{1000})
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
                         .setContentText(msg);
-
-        Log.e("message", msg);
 
         mBuilder.setContentIntent(contentIntent);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());

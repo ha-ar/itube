@@ -33,6 +33,9 @@ public class UserModel {
     @SerializedName("user")
     public User user = new User();
 
+    @SerializedName("token")
+    public String auth_token;
+
 
     public class User {
         @SerializedName("auth_token")

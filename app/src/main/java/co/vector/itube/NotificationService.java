@@ -13,7 +13,6 @@ public class NotificationService extends Service {
 
 	@Override
 	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -38,7 +37,7 @@ public class NotificationService extends Service {
 		Intent intent1 = new Intent(this.getApplicationContext(), LoginActivity.class);
 
 		Notification notification = new Notification(R.drawable.notify_logo,
-				"Please Get Subscription,Only 2 days Left.", System.currentTimeMillis());
+				"Please Get Subscription, Only 2 days Left.", System.currentTimeMillis());
 
 		intent1.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP
 				| Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -50,7 +49,7 @@ public class NotificationService extends Service {
 		notification.flags |= Notification.FLAG_AUTO_CANCEL;
 
 		notification.setLatestEventInfo(this.getApplicationContext(),
-				"iTube Alert", "Please Get Subscription,Only 2 days Left.",
+				"iTube Alert", "Please Get Subscription, Only 2 days Left.",
 				pendingNotificationIntent);
 
 		mManager.notify(0, notification);
@@ -58,7 +57,6 @@ public class NotificationService extends Service {
 
 	@Override
 	public void onDestroy() {
-		// TODO Auto-generated method stub
 		super.onDestroy();
 	}
 

@@ -43,10 +43,12 @@ import DB.Favorite;
 import DB.FavoriteDao;
 import DB.Playlist;
 import DB.PlaylistDao;
+import Models.AdsMessage;
 import Models.GetAllByCategoryModel;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import services.CallBack;
+import services.GetAddService;
 import services.GetByAllCategoryService;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -78,8 +80,6 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         if (baseClass.isTabletDevice(this)) {
             setContentView(R.layout.activity_youtubeplayer_tablet);
             activity= YoutubeBaseActivity.this;
@@ -95,6 +95,7 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             listRelative= (RelativeLayout) findViewById(R.id.listsection1);
             aq.id(R.id.baselayout).background(R.drawable.background_simple);
         }
+
         // footerView = (LinearLayout) findViewById(R.id.footer);
         Animation fadeOutAnimation = AnimationUtils.loadAnimation(activity, R.anim.fade_out);
         aq.id(R.id.animation).animate(fadeOutAnimation);
@@ -111,6 +112,12 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
                 YoutubeBaseActivity.this.finish();
             }
         }, intentFilter);
+
+
+        // check for ads
+        GetAddService ads = new GetAddService(activity);
+        ads.getAdd(baseClass.getAUTH_TOKEN(), new CallBack(activity, "adsCallback"));
+
         otherView = findViewById(R.id.otherview);
         youTubePlayerView = (YouTubePlayerView) findViewById(R.id.youtube);
         baseLayout = (LinearLayout) findViewById(R.id.baselayout);
@@ -336,6 +343,13 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No " + baseClass.getCategory() + " record found.");
             Toast.makeText(this, "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void adsCallback(Object caller, Object model){
+        AdsMessage.getInstance().setList((AdsMessage) model);
+        if(!AdsMessage.getInstance().message.isEmpty()){
+            aq.id(R.id.ads).visible().text(AdsMessage.getInstance().message);
         }
     }
 

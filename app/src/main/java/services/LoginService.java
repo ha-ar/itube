@@ -21,6 +21,7 @@ public class LoginService extends BaseService {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("user[email]", mEmail);
         params.put("user[password]", mPassword);
+
         this.post(url, params, obj, UserModel.getInstance(), message);
     }
 }

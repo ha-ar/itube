@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/baselayout"
+    android:animateLayoutChanges="true"
     android:orientation="vertical">
     <RelativeLayout
         android:layout_width="match_parent"
@@ -98,8 +99,8 @@
                 android:layout_height="wrap_content">
                 <TextView
                     android:id="@+id/playing_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
                     android:textSize="18sp"
                     android:lines="2"
                     android:padding="3dp"
@@ -107,9 +108,25 @@
                     android:layout_marginLeft="3dp"
                     android:layout_marginRight="3dp"
                     android:ellipsize="end"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true" />
+                    android:textAppearance="?android:attr/textAppearanceSmall"/>
+                <TextView
+                    android:id="@+id/ads"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="12sp"
+                    android:maxLength="160"
+                    android:padding="3dp"
+                    android:textColor="@android:color/holo_red_light"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginRight="3dp"
+                    android:layout_marginTop="5dp"
+                    android:drawablePadding="2dp"
+                    android:gravity="start"
+                    android:drawableLeft="@drawable/ic_launcher"
+                    android:drawableStart="@drawable/ic_launcher"
+                    android:ellipsize="end"
+                    android:visibility="gone"
+                    android:textAppearance="?android:attr/textAppearanceSmall"/>
             </LinearLayout>
         </LinearLayout>
         <LinearLayout

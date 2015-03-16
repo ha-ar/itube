@@ -41,7 +41,7 @@ public class BaseActivity extends Activity {
         baseClass  =((BaseClass) getApplicationContext());
         aq = new AQuery(this);
 
-//        minutes = Long.valueOf(baseClass.getCheckDuration());
+        minutes = Long.valueOf(baseClass.getCheckDuration());
 //        Long millisec = minutes *60*1000;
 //        MyCount counter = new MyCount(millisec, 1000);
 //        counter.start();
