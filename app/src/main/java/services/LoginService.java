@@ -1,9 +1,11 @@
 package services;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.HashMap;
 
+import Models.AdsMessage;
 import Models.UserModel;
 
 
@@ -21,7 +23,22 @@ public class LoginService extends BaseService {
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("user[email]", mEmail);
         params.put("user[password]", mPassword);
-
         this.post(url, params, obj, UserModel.getInstance(), message);
+    }
+
+    public void forgorPassword(String mEmail,boolean message, CallBack obj){
+        String url = Constants.BASE_URL+"forgot_password?email="+mEmail;
+        Log.e("url",url);
+        this.get(url, obj, UserModel.getInstance(), message);
+    }
+    public void isActive(String mEmail,boolean message, CallBack obj){
+        String url = Constants.BASE_URL+"is_active?email="+mEmail;
+        Log.e("url",url);
+        this.get(url, obj, UserModel.getInstance(), message);
+    }
+    public void Activated(String mEmail,String code,boolean message, CallBack obj){
+        String url = Constants.BASE_URL+"verify_activation_code?email="+mEmail+"&activation_code="+code;
+        Log.e("url",url);
+        this.get(url, obj, UserModel.getInstance(), message);
     }
 }

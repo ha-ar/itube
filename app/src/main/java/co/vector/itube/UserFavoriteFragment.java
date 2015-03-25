@@ -123,8 +123,8 @@ public class UserFavoriteFragment extends Fragment {
             if(position==0) {
                 try {
                     DeletedSongFromFavorite();
-                    itemListBaseAdapter.notifyDataSetChanged();
                     aq.id(R.id.listView).clear();
+                    baseClass.getArrayList().clear();
                     GetFavoriteFromDB();
                     Crouton.makeText(
                             getActivity(),
@@ -143,6 +143,7 @@ public class UserFavoriteFragment extends Fragment {
         DaoMaster daoMaster = new DaoMaster(ex_db);
         DaoSession daoSession = daoMaster.newSession();
         FavoriteDao favoriteDao = daoSession.getFavoriteDao();
+        Log.e("ok",baseClass.getVideoId());
         favoriteDao.deleteByKey(baseClass.getVideoId());
         daoSession.clear();
         ex_db.close();
@@ -199,11 +200,11 @@ public class UserFavoriteFragment extends Fragment {
             aq.id(R.id.listView).adapter(itemListBaseAdapter);
         }
         else {
+            aq.id(R.id.listView).visibility(View.GONE);
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No Favorite record found.");
         }
         daoSession.clear();
         ex_db.close();
         ex_database_helper_obj.close();
     }
-
 }

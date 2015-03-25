@@ -3,9 +3,13 @@ package co.vector.itube;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -14,11 +18,15 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.androidquery.AQuery;
 
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.Position;
+
+import de.keyboardsurfer.android.widget.crouton.Crouton;
+import de.keyboardsurfer.android.widget.crouton.Style;
 
 /**
  * Created by android on 11/13/14.
@@ -28,6 +36,7 @@ public class BaseActivity extends Activity {
     static  BaseClass baseClass;static SearchView searchView;LinearLayout layout;MenuDrawer mDrawerLeft;
     static BroadcastReceiver receiver = null;
     static Long minutes;
+    AlertDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -159,6 +168,17 @@ public class BaseActivity extends Activity {
                 }
             }
         });
+        aq.id(R.id.layout_sharing).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDrawerLeft.closeMenu();
+                FragmentManager fm = getFragmentManager();
+                for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
+                    fm.popBackStack();
+                }
+                SelectFromMenu();
+            }
+        });
 
 
         if (savedInstanceState == null) {
@@ -166,6 +186,82 @@ public class BaseActivity extends Activity {
                     .add(R.id.frame_container, new BaseFragment()
                             .newinstance()).commit();
         }
+    }
+    public void SelectFromMenu()
+    {
+        final CharSequence[] options = { "Whats App", "Viber","Facebook","Twitter","Cancel" };
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Share this app via");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            String urlToShare = "http://ivideo23.com/iVideo.apk";
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // TODO Auto-generated method stub
+                PackageManager pm=getPackageManager();
+                if (options[which].equals("Whats App")) {
+                    try {
+                        Intent waIntent = new Intent(Intent.ACTION_SEND);
+                        waIntent.setType("text/plain");
+                        pm.getPackageInfo("com.whatsapp", PackageManager.GET_META_DATA);
+                        waIntent.setPackage("com.whatsapp");
+                        waIntent.putExtra(Intent.EXTRA_TEXT, urlToShare);
+                        startActivity(Intent.createChooser(waIntent, "Share with"));
+
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Crouton.makeText(BaseActivity.this, "WhatsApp not Installed", Style.ALERT).show();
+                    }
+
+                } else if (options[which].equals("Viber")) {
+                    try {
+                        Intent intent = new Intent(Intent.ACTION_SEND);
+                        intent.setType("text/plain");
+                        intent.setClassName("com.viber.voip", "com.viber.voip.WelcomeActivity");
+                        intent.putExtra(Intent.EXTRA_TEXT, urlToShare);
+                        startActivity(intent);
+                    } catch (Exception e) {
+                        Crouton.makeText(BaseActivity.this, "Viber not Installed", Style.ALERT).show();
+                    }
+                } else if (options[which].equals("Facebook")) {
+                    try {
+                        Intent intent1 = new Intent();
+                        intent1.setClassName("com.facebook.katana", "com.facebook.katana.activity.composer.ImplicitShareIntentHandler");
+                        intent1.setAction("android.intent.action.SEND");
+                        intent1.setType("text/plain");
+                        intent1.putExtra("android.intent.extra.TEXT", urlToShare);
+                        startActivity(intent1);
+                    } catch (Exception e) {
+                        Intent intent = new Intent(Intent.ACTION_SEND);
+                        String sharerUrl = "https://www.facebook.com/sharer/sharer.php?u=" + urlToShare;
+                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse(sharerUrl));
+                        startActivity(intent);
+                    }
+                } else if (options[which].equals("Twitter")) {
+                    try
+                    {
+                        getPackageManager().getPackageInfo("com.twitter.android", 0);
+                        Intent intent = new Intent(Intent.ACTION_SEND);
+                        intent.setClassName("com.twitter.android", "com.twitter.android.composer.ComposerActivity");
+                        intent.setType("text/plain");
+                        intent.putExtra(Intent.EXTRA_TEXT, urlToShare);
+                        startActivity(intent);
+
+                    }
+                    catch (Exception e)
+                    {
+                        Crouton.makeText(BaseActivity.this,"Twitter is not installed on this device",Style.ALERT).show();
+
+                    }
+                } else if (options[which].equals("Cancel")) {
+                    dialog.dismiss();
+
+                }
+
+            }
+        });
+        dialog = builder.create();
+        dialog.show();
+
     }
 //    public class MyCount extends CountDownTimer {
 //

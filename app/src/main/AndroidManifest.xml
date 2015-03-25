@@ -62,6 +62,22 @@
 
         </activity>
         <activity
+            android:theme="@android:style/Theme.Holo.NoActionBar"
+            android:name=".ActivityForgotPassword"
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan|adjustResize"
+            android:label="@string/app_name">
+
+        </activity>
+        <activity
+            android:theme="@android:style/Theme.Holo.NoActionBar"
+            android:name=".ActivityActivationCode"
+            android:exported="true"
+            android:windowSoftInputMode="adjustPan|adjustResize"
+            android:label="@string/app_name">
+
+        </activity>
+        <activity
             android:theme="@android:style/Theme.Holo.Light.NoActionBar"
             android:name=".SignupActivity"
             android:windowSoftInputMode="adjustPan|adjustResize"

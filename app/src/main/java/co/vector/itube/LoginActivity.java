@@ -25,12 +25,14 @@ import services.LoginService;
 public class LoginActivity extends Activity  {
     private static final String TAG = "Android BillingService";
     AQuery aq;
+    LoginService obj;
     private String expiryUpdate = "43800";
 
     private BaseClass baseClass;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        obj = new LoginService(LoginActivity.this);
         baseClass = ((BaseClass) getApplicationContext());
         if(baseClass.isTabletDevice(this))
         {
@@ -72,7 +74,7 @@ public class LoginActivity extends Activity  {
                 }
                 if(!isEmailValid(aq.id(R.id.email).getText().toString()))
                 {
-                    Crouton.makeText(LoginActivity.this,"Enter Correct Email.",Style.ALERT).show();
+                    Crouton.makeText(LoginActivity.this,"Please Enter Valid Email.",Style.ALERT).show();
                     return;
                 }
                 if(aq.id(R.id.password).getText().length() < 8)
@@ -80,7 +82,7 @@ public class LoginActivity extends Activity  {
                     Crouton.makeText(LoginActivity.this,"Password should be at least 8 digits.",Style.ALERT).show();
                     return;
                 }
-                LoginService obj = new LoginService(LoginActivity.this);
+
                 obj.login(aq.id(R.id.email).getText().toString(),
                         aq.id(R.id.password).getText().toString(),true, new CallBack(LoginActivity.this, "ConfirmLogin"));
             }
@@ -94,18 +96,35 @@ public class LoginActivity extends Activity  {
                startActivity(new Intent(LoginActivity.this,SignupActivity.class));
             }
         });
+        aq.id(R.id.forgot_password).clicked(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LoginActivity.this, ActivityForgotPassword.class));
+            }
+        });
+
 
     }
-
+    public void IsActive(Object caller, Object model) {
+        UserModel.getInstance().setList((UserModel) model);
+        if (UserModel.getInstance().success.equalsIgnoreCase("true")) {
+            startActivity(new Intent(LoginActivity.this, BaseActivity.class));
+            LoginActivity.this.finish();
+        }
+        else {
+            startActivity(new Intent(LoginActivity.this, ActivityActivationCode.class));
+            LoginActivity.this.finish();
+        }
+    }
     public void ConfirmLogin(Object caller, Object model) {
         UserModel.getInstance().setList((UserModel) model);
         if (UserModel.getInstance().success.equalsIgnoreCase("true")) {
             baseClass.setAUTH_TOKEN(UserModel.getInstance().auth_token);  //in case of expiry
             if (UserModel.getInstance().expire.equalsIgnoreCase("false")) {
                 baseClass.setAUTH_TOKEN(UserModel.getInstance().user.auth_token);
+                baseClass.setEmail(aq.id(R.id.email).getText().toString());
                 baseClass.setCheckDuration(Long.parseLong(UserModel.getInstance().user.duration));
-                startActivity(new Intent(LoginActivity.this, BaseActivity.class));
-                LoginActivity.this.finish();
+                obj.isActive(aq.id(R.id.email).getText().toString(), true, new CallBack(LoginActivity.this, "IsActive"));
             } else {
                 Crouton.makeText(this, "Trail Expired,Please get Subscription.", Style.ALERT).show();
                 new AlertDialog.Builder(this)
@@ -114,11 +133,20 @@ public class LoginActivity extends Activity  {
                         .setPositiveButton("Yes",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-                                        if(BillingHelper.isBillingSupported()){
-                                        BillingHelper.requestPurchase(getApplicationContext(), "android.test.purchased");
-                                        } else {
-                                            Log.i(TAG,"Can't purchase on this device");
-                                        }
+                                        new AlertDialog.Builder(LoginActivity.this)
+                                                .setMessage("iVideo                 $50.00")
+                                                .setCancelable(false)
+                                                .setPositiveButton("Yes",
+                                                        new DialogInterface.OnClickListener() {
+                                                            public void onClick(DialogInterface dialog, int id) {
+//
+                                            }
+                                                               }).setNegativeButton("No", null).show();
+//                                        if(BillingHelper.isBillingSupported()){
+//                                        BillingHelper.requestPurchase(getApplicationContext(), "android.test.purchased");
+//                                        } else {
+//                                            Log.i(TAG,"Can't purchase on this device");
+//                                        }
                                     }
                                 }).setNegativeButton("No", null).show();
             }
@@ -126,6 +154,7 @@ public class LoginActivity extends Activity  {
             Crouton.makeText(this, "Invalid Username/Password", Style.ALERT).show();
         }
     }
+
 
     public Handler mTransactionHandler = new Handler(){
         public void handleMessage(android.os.Message msg) {

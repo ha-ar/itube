@@ -21,7 +21,6 @@ import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.androidquery.AQuery;
 
@@ -185,7 +184,7 @@ public class SongsListViewFragment extends Fragment {
 
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
+            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
         }
     }
     public void GetAllBySearchMore(Object caller, Object model) {
@@ -203,7 +202,7 @@ public class SongsListViewFragment extends Fragment {
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
+            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
         }
     }
     public void GetAllByMovies(Object caller, Object model) {
@@ -221,7 +220,7 @@ public class SongsListViewFragment extends Fragment {
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
+            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
         }
     }
     public void GetAllByMoviesMore(Object caller, Object model) {
@@ -239,7 +238,7 @@ public class SongsListViewFragment extends Fragment {
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
+            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
         }
     }
     private  void PrepareDropDown()
@@ -298,7 +297,7 @@ public class SongsListViewFragment extends Fragment {
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
+            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
         }
     }
     public void GetAllByCartoonsMore(Object caller, Object model) {
@@ -316,7 +315,7 @@ public class SongsListViewFragment extends Fragment {
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
+            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
         }
     }
     public void GetAllByMusic(Object caller, Object model) {
@@ -332,7 +331,7 @@ public class SongsListViewFragment extends Fragment {
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
+            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
         }
     }
     public void GetAllByMusicMore(Object caller, Object model) {
@@ -350,7 +349,7 @@ public class SongsListViewFragment extends Fragment {
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
+            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
         }
     }
     public void GetAllByDocumentaries(Object caller, Object model) {
@@ -367,7 +366,7 @@ public class SongsListViewFragment extends Fragment {
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
+            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
         }
     }
     public void GetAllByDocumentariesMore(Object caller, Object model) {
@@ -385,7 +384,7 @@ public class SongsListViewFragment extends Fragment {
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
         } else {
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Toast.makeText(getActivity(), "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
+            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
         }
     }
     static int p;

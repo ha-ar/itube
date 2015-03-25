@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:text="Home"
-        android:textColor="#9eded7"
+        android:textColor="#032703"
         android:id="@+id/home"
         android:paddingLeft="20dp"
         android:layout_gravity="center_vertical"/>
@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="Categories"
-            android:textColor="#9eded7"
+            android:textColor="#032703"
             android:id="@+id/category"
             android:paddingLeft="20dp"
             android:layout_gravity="center_vertical"/>
@@ -75,7 +75,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="Favorites"
-            android:textColor="#9eded7"
+            android:textColor="#032703"
             android:id="@+id/favorite"
             android:paddingLeft="20dp"
             android:layout_gravity="center_vertical"/>
@@ -101,8 +101,34 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="Playlist"
-            android:textColor="#9eded7"
+            android:textColor="#032703"
             android:id="@+id/playlist"
+            android:paddingLeft="20dp"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_marginLeft="10dp"
+        android:background="#88676767"
+        android:layout_height="1dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:id="@+id/layout_sharing"
+        android:layout_height="50dp">
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/share"
+            android:id="@+id/image_sharing" />
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Share This App Via"
+            android:textColor="#032703"
+            android:id="@+id/sharing"
             android:paddingLeft="20dp"
             android:layout_gravity="center_vertical"/>
     </LinearLayout>
@@ -127,7 +153,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="Get Subscription"
-            android:textColor="#9eded7"
+            android:textColor="#032703"
             android:id="@+id/subscription"
             android:paddingLeft="20dp"
             android:layout_gravity="center_vertical"/>
@@ -160,7 +186,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="Logout"
-            android:textColor="#9eded7"
+            android:textColor="#032703"
             android:id="@+id/logout"
             android:paddingLeft="20dp"
             android:layout_gravity="center_vertical"/>

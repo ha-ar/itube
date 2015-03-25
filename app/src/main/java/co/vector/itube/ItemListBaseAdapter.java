@@ -2,6 +2,7 @@ package co.vector.itube;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,6 +73,7 @@ public class ItemListBaseAdapter extends ArrayAdapter<ItemDetails> {
            public void onClick(View v) {
                    newArrayListId = BaseActivity.baseClass.getArrayList();
                    newArrayListdetail = BaseActivity.baseClass.getSaveList();
+
                    BaseActivity.baseClass.setVideoId(newArrayListId.get(position));
                    BaseActivity.baseClass.setVideoTitle(newArrayListdetail.get(position).getName());
                    BaseActivity.baseClass.setVideoThumbnail(newArrayListdetail.get(position).getName());

@@ -25,7 +25,7 @@
             android:layout_centerVertical="true"
             android:layout_below="@+id/image"
             android:singleLine="true"
-            android:textColor="#9eded7"
+            android:textColor="#032703"
             android:textSize="16sp"
             android:layout_centerHorizontal="true"
             android:textStyle="bold"

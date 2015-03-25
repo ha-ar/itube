@@ -134,7 +134,7 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             aq.id(R.id.add_playlist).background(R.drawable.add);
         }
         if (isFavoriteVideoIdExist()) {
-            aq.id(R.id.favorite).background(R.drawable.favorited);
+            aq.id(R.id.favorite).background(R.drawable.favorited_u);
         } else {
             aq.id(R.id.favorite).background(R.drawable.favorite);
         }
@@ -164,7 +164,7 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             public void onClick(View v) {
                 try {
                     AddedSongToFavorite();
-                    aq.id(R.id.favorite).background(R.drawable.favorited);
+                    aq.id(R.id.favorite).background(R.drawable.favorited_u);
                     Crouton.makeText(
                             activity,
                             "Video Added to Favorites.",
@@ -431,7 +431,6 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
                 return listItem;
             }
         };
-
         return adapter;
     }
 
@@ -440,6 +439,7 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
     }
 
     private boolean isPlaylistVideoIdExist() {
+        status = 0;
         List<Playlist> temp = new ArrayList<Playlist>();
         try{
             DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
@@ -454,7 +454,6 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             ex_db.close();
             ex_database_helper_obj.close();
         }catch (Exception e){
-            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
         }
 
         for (int loop = 0; loop < temp.size(); loop++) {
@@ -487,7 +486,6 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             ex_db.close();
             ex_database_helper_obj.close();
         }catch (Exception e){
-            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
         }
 
         for (int loop = 0; loop < temp.size(); loop++) {
@@ -505,7 +503,7 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
     }
 
     public void AddedSongToPlaylist() {
-        try {
+      //  try {
             DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
                     activity, "javantube.sqlite", null);
             SQLiteDatabase ex_db = ex_database_helper_obj
@@ -520,31 +518,26 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             daoSession.clear();
             ex_db.close();
             ex_database_helper_obj.close();
-        }catch (Exception e){
-            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
-        }
+//        }catch (Exception e){
+//        }
     }
 
-    public void DeletedSongFromPlaylist() {
-        try {
-            DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
-                    activity, "javantube.sqlite", null);
-            SQLiteDatabase ex_db = ex_database_helper_obj
-                    .getWritableDatabase();
-            DaoMaster daoMaster = new DaoMaster(ex_db);
-            DaoSession daoSession = daoMaster.newSession();
-            PlaylistDao playlistDao = daoSession.getPlaylistDao();
-            playlistDao.deleteByKey(baseClass.getVideoId());
-            daoSession.clear();
-            ex_db.close();
-            ex_database_helper_obj.close();
-        }catch (Exception e){
-            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
-        }
+    public void DeletedSongFromPlaylist(){
+        DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
+                activity, "javantube.sqlite", null);
+        SQLiteDatabase ex_db = ex_database_helper_obj
+                .getWritableDatabase();
+        DaoMaster daoMaster = new DaoMaster(ex_db);
+        DaoSession daoSession = daoMaster.newSession();
+        PlaylistDao playlistDao = daoSession.getPlaylistDao();
+        playlistDao.deleteByKey(baseClass.getVideoId());
+        daoSession.clear();
+        ex_db.close();
+        ex_database_helper_obj.close();
     }
 
     public void AddedSongToFavorite() {
-        try {
+       // try {
             DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
                     activity, "javantube.sqlite", null);
             SQLiteDatabase ex_db = ex_database_helper_obj
@@ -556,15 +549,17 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
                     baseClass.getVideoViewer(), baseClass.getVideoUploadDate(), baseClass.getVideoAuthor(), baseClass.getVideoThumbnail());
             favoriteDao.insert(favorite);
             daoSession.clear();
+            Log.e("id",baseClass.getVideoId());
             ex_db.close();
             ex_database_helper_obj.close();
-        }catch (Exception e){
-            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
-        }
+//        }catch (Exception e){
+//            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
+//        }
     }
 
     public void DeletedSongFromFavorite() {
-        try {
+        Log.e("id",baseClass.getVideoId());
+       // try {
             DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
                     activity, "javantube.sqlite", null);
             SQLiteDatabase ex_db = ex_database_helper_obj
@@ -573,12 +568,13 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
             DaoSession daoSession = daoMaster.newSession();
             FavoriteDao favoriteDao = daoSession.getFavoriteDao();
             favoriteDao.deleteByKey(baseClass.getVideoId());
+
             daoSession.clear();
             ex_db.close();
             ex_database_helper_obj.close();
-        }catch (Exception e){
-            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
-        }
+//        }catch (Exception e){
+//            Crouton.makeText(this, "Something went wrong. Try again!", Style.INFO).show();
+//        }
     }
 
     @Override

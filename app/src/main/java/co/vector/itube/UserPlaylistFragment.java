@@ -119,8 +119,8 @@ public class UserPlaylistFragment extends Fragment {
             if(position==0) {
                 try {
                     DeletedSongFromPlaylist();
-                    itemListBaseAdapter.notifyDataSetChanged();
                     aq.id(R.id.listView).clear();
+                    baseClass.getArrayList().clear();
                     GetPlaylistFromDB();
                     Crouton.makeText(
                             getActivity(),
@@ -194,6 +194,7 @@ public class UserPlaylistFragment extends Fragment {
             aq.id(R.id.listView).adapter(itemListBaseAdapter);
         }
         else {
+            aq.id(R.id.listView).visibility(View.GONE);
             aq.id(R.id.textView).visibility(View.VISIBLE).text("No Playlist record found.");
         }
         daoSession.clear();

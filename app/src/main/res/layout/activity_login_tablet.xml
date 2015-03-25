@@ -106,6 +106,21 @@
             android:hint="Password"
             android:singleLine="true"
             android:layout_below="@+id/email" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Forgot Password?"
+            android:id="@+id/forgot_password"
+            android:lines="2"
+            android:layout_below="@+id/password"
+            android:ellipsize="end"
+            android:textStyle="bold"
+            android:layout_marginTop="5dp"
+            android:layout_marginRight="20dp"
+            android:textSize="14sp"
+            android:layout_alignParentRight="true"
+            android:gravity="center|right" />
 
         <Button android:id="@+id/email_sign_in_button"
             android:layout_width="match_parent"
