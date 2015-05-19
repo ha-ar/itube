@@ -14,27 +14,18 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.PowerManager;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.util.TypedValue;
 
 import com.google.android.youtube.player.YouTubePlayer;
 import com.splunk.mint.Mint;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 

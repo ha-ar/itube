@@ -5,6 +5,7 @@ package services;
  */
    public  class Constants {
     static String BASE_URL= "http://javan-tube.herokuapp.com/services/";
+//    static String BASE_URL= "http://ivideo23.com/services/";
     static String SIGNUP_API = "sign_up";
     static String LOGIN_API = "sign_in";
     static String UPDATE_EXPIRY_API = "update_expiry";

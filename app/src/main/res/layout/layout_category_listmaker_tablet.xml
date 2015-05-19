@@ -29,7 +29,6 @@
             android:textColor="#032703"
             android:textSize="35sp"
             android:layout_centerHorizontal="true"
-            android:textStyle="bold"
             android:ellipsize="end"
             android:textAppearance="?android:attr/textAppearanceSmall" />
     </RelativeLayout>

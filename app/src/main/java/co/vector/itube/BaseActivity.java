@@ -3,11 +3,9 @@ package co.vector.itube;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,25 +16,32 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SearchView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.androidquery.AQuery;
+import com.anjlab.android.iab.v3.BillingProcessor;
+import com.anjlab.android.iab.v3.TransactionDetails;
 
 import net.simonvt.menudrawer.MenuDrawer;
 import net.simonvt.menudrawer.Position;
 
+import Models.AdsMessage;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
+import services.CallBack;
+import services.ExpiryUpdateService;
 
 /**
  * Created by android on 11/13/14.
  */
-public class BaseActivity extends Activity {
+public class BaseActivity extends Activity implements BillingProcessor.IBillingHandler{
     static  TextView language;AQuery aq;int open;static PopupWindow popupWindow;
     static  BaseClass baseClass;static SearchView searchView;LinearLayout layout;MenuDrawer mDrawerLeft;
     static BroadcastReceiver receiver = null;
     static Long minutes;
     AlertDialog dialog;
+    private String expiryUpdate = "43800";
+    BillingProcessor bp;
+    private String inAppKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt1bneditxo/p+q3yffJlUFO1X+M8r5G+WjpHOjccBD0gkHYC7YfwVDwJA0UUMRbSO/dnfYT38LIxMOJBnAK+PLGv1N3kciDDZamGOADZtC1gW9eTlMM3OWkc7KUxvltfk2miHpG8elM9ZGl1zPoLGmgkg3DXKz+IjVsVXt2I8OTt/vqSn7zeezWANfVTqlakFuiN1pXoo76/ER87g8gM9HLpysenbRNBAIvvJcPQog0Uu+ol4csLtvSmSPY4OmMrfPml8lfJh5cF1Uov8cTSvMuC+muAttXiZAIUoD8eU3laDJvdZsee5pbr2Z2dFQ3ZJAmkm33lkQuGKay7FNv7iQIDAQAB";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,22 +54,16 @@ public class BaseActivity extends Activity {
         mDrawerLeft.setupUpIndicator(this);
         baseClass  =((BaseClass) getApplicationContext());
         aq = new AQuery(this);
+        bp = new BillingProcessor(this, inAppKey, this);
 
-        minutes = Long.valueOf(baseClass.getCheckDuration());
-//        Long millisec = minutes *60*1000;
-//        MyCount counter = new MyCount(millisec, 1000);
-//        counter.start();
-        if(baseClass.isTabletDevice(this))
-        {
+        minutes = baseClass.getCheckDuration();
+        if(BaseClass.isTabletDevice(this))
             aq.id(R.id.BaseLayout).background(R.drawable.background_tablet);
-        }
         else
-        {
             aq.id(R.id.BaseLayout).background(R.drawable.background_simple);
-        }
         language = (TextView) findViewById(R.id.select_language);
         searchView = (SearchView) findViewById(R.id.search);
-        open=0;
+        open = 0;
         searchView.setOnSearchClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -161,11 +160,7 @@ public class BaseActivity extends Activity {
                 for(int i = 0; i < fm.getBackStackEntryCount(); ++i) {
                     fm.popBackStack();
                 }
-                if(BillingHelper.isBillingSupported()){
-                    BillingHelper.requestPurchase(getApplicationContext(), "android.test.purchased");
-                } else {
-                    Log.i("TAG", "Can't purchase on this device");
-                }
+                bp.purchase(BaseActivity.this, "android.test.purchased");
             }
         });
         aq.id(R.id.layout_sharing).clicked(new View.OnClickListener() {
@@ -189,7 +184,7 @@ public class BaseActivity extends Activity {
     }
     public void SelectFromMenu()
     {
-        final CharSequence[] options = { "Whats App", "Viber","Facebook","Twitter","Cancel" };
+        final CharSequence[] options = { "WhatsApp", "Viber","Facebook","Twitter","Cancel" };
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Share this app via");
         builder.setItems(options, new DialogInterface.OnClickListener() {
@@ -263,28 +258,6 @@ public class BaseActivity extends Activity {
         dialog.show();
 
     }
-//    public class MyCount extends CountDownTimer {
-//
-//        public MyCount(long millisInFuture, long countDownInterval) {
-//            super(millisInFuture, countDownInterval);
-//        }
-//
-//        @Override
-//        public void onFinish() {
-//            baseClass.clearSharedPrefs();
-//            startActivity(new Intent(BaseActivity.this, LoginActivity.class));
-//            Intent broadcastIntent = new Intent();
-//            broadcastIntent
-//                    .setAction("co.vector.itube");
-//            LocalBroadcastManager.getInstance(BaseActivity.this).sendBroadcast(broadcastIntent);
-//            BaseActivity.this.finish();
-//        }
-//
-//        @Override
-//        public void onTick(long millisUntilFinished) {
-//        }
-//    }
-
     @Override
     public void onBackPressed() {
         if(this.getFragmentManager().getBackStackEntryCount()==0) {
@@ -306,7 +279,54 @@ public class BaseActivity extends Activity {
     public void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         receiver = null;
+        if (bp != null)
+            bp.release();
 
         super.onDestroy();
+    }
+
+
+    // IBillingHandler implementation
+
+    @Override
+    public void onBillingInitialized() {
+        Log.e("Billing", "billing init");
+        /*
+         * Called when BillingProcessor was initialized and it's ready to purchase
+         */
+    }
+
+    @Override
+    public void onProductPurchased(String productId, TransactionDetails details) {
+        Log.e("Billing", "billing purchased");
+        /*
+         * Called when requested PRODUCT ID was successfully purchased
+         */
+        ExpiryUpdateService obj = new ExpiryUpdateService(BaseActivity.this);
+        obj.expiryUpdate(expiryUpdate, true, baseClass.getAUTH_TOKEN(), new CallBack(BaseActivity.this, "expiryUpdate"));
+
+    }
+
+    @Override
+    public void onBillingError(int errorCode, Throwable error) {
+        Log.e("error code", errorCode+"");
+
+    }
+
+    @Override
+    public void onPurchaseHistoryRestored() {
+        /*
+         * Called when purchase history was restored and the list of all owned PRODUCT ID's
+         * was loaded from Google Play
+         */
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (!bp.handleActivityResult(requestCode, resultCode, data))
+            super.onActivityResult(requestCode, resultCode, data);
+    }
+    public void expiryUpdate(Object caller, Object model) {
+        AdsMessage.getInstance().setList((AdsMessage) model);
+        Crouton.makeText(BaseActivity.this, AdsMessage.getInstance().message, Style.INFO).show();
     }
 }

@@ -6,13 +6,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 
 import com.androidquery.AQuery;
+import com.anjlab.android.iab.v3.BillingProcessor;
+import com.anjlab.android.iab.v3.TransactionDetails;
 
 import Models.AdsMessage;
 import Models.UserModel;
@@ -22,11 +23,13 @@ import services.CallBack;
 import services.ExpiryUpdateService;
 import services.LoginService;
 
-public class LoginActivity extends Activity  {
+public class LoginActivity extends Activity implements BillingProcessor.IBillingHandler{
     private static final String TAG = "Android BillingService";
     AQuery aq;
     LoginService obj;
     private String expiryUpdate = "43800";
+    BillingProcessor bp;
+    private String inAppKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt1bneditxo/p+q3yffJlUFO1X+M8r5G+WjpHOjccBD0gkHYC7YfwVDwJA0UUMRbSO/dnfYT38LIxMOJBnAK+PLGv1N3kciDDZamGOADZtC1gW9eTlMM3OWkc7KUxvltfk2miHpG8elM9ZGl1zPoLGmgkg3DXKz+IjVsVXt2I8OTt/vqSn7zeezWANfVTqlakFuiN1pXoo76/ER87g8gM9HLpysenbRNBAIvvJcPQog0Uu+ol4csLtvSmSPY4OmMrfPml8lfJh5cF1Uov8cTSvMuC+muAttXiZAIUoD8eU3laDJvdZsee5pbr2Z2dFQ3ZJAmkm33lkQuGKay7FNv7iQIDAQAB";
 
     private BaseClass baseClass;
     @Override
@@ -34,7 +37,7 @@ public class LoginActivity extends Activity  {
         super.onCreate(savedInstanceState);
         obj = new LoginService(LoginActivity.this);
         baseClass = ((BaseClass) getApplicationContext());
-        if(baseClass.isTabletDevice(this))
+        if(BaseClass.isTabletDevice(this))
         {
             setContentView(R.layout.activity_login_tablet);
         }
@@ -42,13 +45,7 @@ public class LoginActivity extends Activity  {
             setContentView(R.layout.activity_login);
         }
 
-        startService(new Intent(getApplicationContext(), BillingService.class));
-        BillingHelper.setCompletedHandler(mTransactionHandler);
-
-//        if(!baseClass.getAUTH_TOKEN().equalsIgnoreCase(""))
-//        {
-//            startActivity(new Intent(LoginActivity.this,BaseActivity.class));
-//        }
+        bp = new BillingProcessor(this, inAppKey, this);
 
         final Button Register = (Button) findViewById(R.id.register_here);
         final Button Signin = (Button) findViewById(R.id.email_sign_in_button);
@@ -58,9 +55,9 @@ public class LoginActivity extends Activity  {
             @Override
             public void onClick(View v) {
                 try{
-                InputMethodManager imm = (InputMethodManager)getApplicationContext().getSystemService(
-                        Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(Signin.getWindowToken(), 0);
+                    InputMethodManager imm = (InputMethodManager)getApplicationContext().getSystemService(
+                            Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(Signin.getWindowToken(), 0);
                 }catch(NullPointerException e){}
                 if(aq.id(R.id.email).getText().toString().isEmpty())
                 {
@@ -93,7 +90,7 @@ public class LoginActivity extends Activity  {
                 InputMethodManager imm = (InputMethodManager)getApplicationContext().getSystemService(
                         Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(Register.getWindowToken(), 0);
-               startActivity(new Intent(LoginActivity.this,SignupActivity.class));
+                startActivity(new Intent(LoginActivity.this,SignupActivity.class));
             }
         });
         aq.id(R.id.forgot_password).clicked(new View.OnClickListener() {
@@ -133,20 +130,8 @@ public class LoginActivity extends Activity  {
                         .setPositiveButton("Yes",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-                                        new AlertDialog.Builder(LoginActivity.this)
-                                                .setMessage("iVideo                 $50.00")
-                                                .setCancelable(false)
-                                                .setPositiveButton("Yes",
-                                                        new DialogInterface.OnClickListener() {
-                                                            public void onClick(DialogInterface dialog, int id) {
-//
-                                            }
-                                                               }).setNegativeButton("No", null).show();
-//                                        if(BillingHelper.isBillingSupported()){
-//                                        BillingHelper.requestPurchase(getApplicationContext(), "android.test.purchased");
-//                                        } else {
-//                                            Log.i(TAG,"Can't purchase on this device");
-//                                        }
+                                        bp.purchase(LoginActivity.this, "android.test.purchased");
+
                                     }
                                 }).setNegativeButton("No", null).show();
             }
@@ -155,41 +140,62 @@ public class LoginActivity extends Activity  {
         }
     }
 
-
-    public Handler mTransactionHandler = new Handler(){
-        public void handleMessage(android.os.Message msg) {
-            try {
-                Log.i(TAG, "Transaction complete");
-                ExpiryUpdateService obj = new ExpiryUpdateService(LoginActivity.this);
-                obj.expiryUpdate(expiryUpdate,true, baseClass.getAUTH_TOKEN(), new CallBack(LoginActivity.this, "expiryUpdate"));
-
-//                Log.i(TAG, "Transaction status: " + BillingHelper.latestPurchase.purchaseState);
-//                Log.i(TAG, "Item purchased is: " + BillingHelper.latestPurchase.productId);
-            }catch (NullPointerException e){
-                e.printStackTrace();
-            }
-        };
-
-    };
     public boolean isEmailValid(String email) {
         return email.contains("@");
     }
 
     public void expiryUpdate(Object caller, Object model) {
         AdsMessage.getInstance().setList((AdsMessage) model);
-
         Crouton.makeText(LoginActivity.this, AdsMessage.getInstance().message, Style.INFO).show();
     }
 
     @Override
-    public void onBackPressed() {
-        try {
-            BillingHelper.stopService();
-        }catch (NullPointerException e){}
-        super.onBackPressed();
+    public void onBillingInitialized() {
+        Log.e("Billing", "billing init");
+        /*
+         * Called when BillingProcessor was initialized and it's ready to purchase
+         */
+    }
+
+    @Override
+    public void onProductPurchased(String productId, TransactionDetails details) {
+        Log.e("Billing", "billing purchased");
+        /*
+         * Called when requested PRODUCT ID was successfully purchased
+         */
+        ExpiryUpdateService obj = new ExpiryUpdateService(LoginActivity.this);
+        obj.expiryUpdate(expiryUpdate, true, baseClass.getAUTH_TOKEN(), new CallBack(LoginActivity.this, "expiryUpdate"));
 
     }
 
+    @Override
+    public void onBillingError(int errorCode, Throwable error) {
+        Log.e("error code", errorCode+"");
+        Crouton.makeText(LoginActivity.this, "Oops! Something went wrong.", Style.ALERT).show();
+        /*
+         * Called when some error occurred. See Constants class for more details
+         */
+    }
+
+    @Override
+    public void onPurchaseHistoryRestored() {
+        /*
+         * Called when purchase history was restored and the list of all owned PRODUCT ID's
+         * was loaded from Google Play
+         */
+    }
+    @Override
+    public void onDestroy() {
+        if (bp != null)
+            bp.release();
+
+        super.onDestroy();
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (!bp.handleActivityResult(requestCode, resultCode, data))
+            super.onActivityResult(requestCode, resultCode, data);
+    }
 }
 
 

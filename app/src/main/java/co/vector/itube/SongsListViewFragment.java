@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,7 +16,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.SearchView;
@@ -26,7 +25,6 @@ import com.androidquery.AQuery;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import DB.DaoMaster;
 import DB.DaoSession;
@@ -35,6 +33,7 @@ import DB.FavoriteDao;
 import DB.Playlist;
 import DB.PlaylistDao;
 import Models.GetAllByCategoryModel;
+import Models.VideoItem;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import services.CallBack;
@@ -50,6 +49,7 @@ public class SongsListViewFragment extends Fragment {
     View rootView;static  int SelectedId;  String popUpContents[];static String Query;
     static GridView list_songs;static int index;
     GetByAllCategoryService obj;
+    private List<VideoItem> searchResults;
 
     public SongsListViewFragment() {
     }
@@ -66,6 +66,19 @@ public class SongsListViewFragment extends Fragment {
         rootView = inflater.inflate(R.layout.layout_songslistview,
                 container, false);
         list_songs = (GridView) rootView.findViewById(R.id.listView);
+        final Handler handler = new Handler();
+            new Thread(){
+                public void run(){
+                    YoutubeConnector yc = new YoutubeConnector(getActivity());
+                    searchResults = yc.search("Hindi Songs");
+                    handler.post(new Runnable(){
+                        public void run(){
+
+                            Log.e("done", "getting videos done");
+                        }
+                    });
+                }
+            }.start();
         list_songs.setOnScrollListener(new EndlessScrollListener() {
             @Override
             public void onLoadMore(int page, int totalItemsCount) {
@@ -85,7 +98,7 @@ public class SongsListViewFragment extends Fragment {
             }
         });
         //footerView = (LinearLayout) rootView.findViewById(R.id.footer);
-        if(!baseClass.isTabletDevice(getActivity()))
+        if(!BaseClass.isTabletDevice(getActivity()))
         {
             list_songs.setNumColumns(2);
         }
@@ -113,7 +126,9 @@ public class SongsListViewFragment extends Fragment {
             @Override
             public boolean onQueryTextChange(String newText) {
                 if (newText.length() != 0) {
-                    SongsListViewFragment.this.songListViewAdapter.filter(newText);
+                    try{
+                        songListViewAdapter.filter(newText);
+                    }catch (NullPointerException npe){}
                 }
                 else
                 {

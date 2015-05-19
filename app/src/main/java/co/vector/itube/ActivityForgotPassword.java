@@ -2,7 +2,6 @@ package co.vector.itube;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 
 import com.androidquery.AQuery;
