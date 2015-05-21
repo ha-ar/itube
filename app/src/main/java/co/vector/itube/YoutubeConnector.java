@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import Models.GetAllByCategoryModel;
 import Models.VideoItem;
 
 public class YoutubeConnector {
@@ -34,8 +35,9 @@ public class YoutubeConnector {
 		try{
 			query = youtube.search().list("id,snippet");
 			query.setKey(KEY);
+			query.setMaxResults(50l);
 			query.setType("video");
-			query.setFields("items(id/videoId,snippet/title,snippet/description,snippet/thumbnails/default/url)");
+//			query.setFields("items(id/videoId,snippet/title,snippet/description,snippet/thumbnails/default/url)");
 		}catch(IOException e){
 			Log.d("YC", "Could not initialize: "+e);
 		}
@@ -49,14 +51,26 @@ public class YoutubeConnector {
 			List<SearchResult> results = response.getItems();
 
 			List<VideoItem> items = new ArrayList<VideoItem>();
+            GetAllByCategoryModel obj = GetAllByCategoryModel.getInstance();
+            obj.category.max_result_count = response.getPageInfo().getTotalResults();
+
 			for(SearchResult result:results){
-				VideoItem item = new VideoItem();
-				item.setTitle(result.getSnippet().getTitle());
-				item.setDescription(result.getSnippet().getDescription());
-				item.setThumbnailURL(result.getSnippet().getThumbnails().getDefault().getUrl());
-				item.setId(result.getId().getVideoId());
-				items.add(item);
+                GetAllByCategoryModel.Videos video = new GetAllByCategoryModel.Videos();
+                video.title = result.getSnippet().getTitle();
+                video.description = result.getSnippet().getDescription();
+                video.thumbnails.add(result.getSnippet().getThumbnails().getDefault().getUrl());
+                video.player_url = result.getId().getVideoId();
+                video.uploaded_at = result.getSnippet().getPublishedAt().toStringRfc3339();
+
+                obj.category.videos.add(video);
+//				VideoItem item = new VideoItem();
+//				item.setTitle(result.getSnippet().getTitle());
+//				item.setDescription(result.getSnippet().getDescription());
+//				item.setThumbnailURL(result.getSnippet().getThumbnails().getDefault().getUrl());
+//				item.setId(result.getId().getVideoId());
+//				items.add(item);
 			}
+            Log.e("Youtube Connector size", GetAllByCategoryModel.getInstance().category.videos.size()+"");
 			return items;
 		}catch(IOException e){
 			Log.d("YC", "Could not search: "+e);

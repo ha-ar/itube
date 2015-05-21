@@ -43,11 +43,11 @@ public class GetAllByCategoryModel {
         public String updated_at;
         public String total_result_count;
         public String offset;
-        public String max_result_count;
+        public int max_result_count;
         @SerializedName("videos")
         public ArrayList<Videos> videos = new ArrayList<Videos>();
     }
-    public class Videos {
+    public static class Videos {
         public String video_id ;
         public String published_at;
         public String updated_at;
@@ -71,7 +71,7 @@ public class GetAllByCategoryModel {
         public String unique_id;
         public String perm_private;
         @SerializedName("thumbnails")
-        public ArrayList<Thumbnails> thumbnails = new ArrayList<Thumbnails>();
+        public ArrayList<String> thumbnails = new ArrayList<String>();
         @SerializedName("author")
         public Author author = new Author();
     }
@@ -79,7 +79,7 @@ public class GetAllByCategoryModel {
         @SerializedName("url")
         public String url ;
     }
-    public class Author {
+    public static class Author {
         @SerializedName("name")
         public String name ;
     }

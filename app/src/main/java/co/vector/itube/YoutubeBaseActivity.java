@@ -204,7 +204,7 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
                         videoId = GetAllByCategoryModel.getInstance().category.videos.get(position).unique_id;
                         videoTitle = GetAllByCategoryModel.getInstance().category.videos.get(position).title;
                         videoPlayerlink = GetAllByCategoryModel.getInstance().category.videos.get(position).player_url;
-                        videothumbnail = GetAllByCategoryModel.getInstance().category.videos.get(position).thumbnails.get(0).url;
+                        videothumbnail = GetAllByCategoryModel.getInstance().category.videos.get(position).thumbnails.get(0);
                         videoDuration = GetAllByCategoryModel.getInstance().category.videos.get(position).duration;
                         videoViewer = GetAllByCategoryModel.getInstance().category.videos.get(position).view_count;
                         baseClass.setVideoId(videoId);
@@ -677,7 +677,7 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
                 item_details.setViewer(GetAllByCategoryModel.getInstance().category.videos.get(p).view_count);
                 item_details.setduration(GetAllByCategoryModel.getInstance().category.videos.get(p).duration);
                 item_details.setUploaddate(GetAllByCategoryModel.getInstance().category.videos.get(p).uploaded_at);
-                item_details.setImage(GetAllByCategoryModel.getInstance().category.videos.get(p).thumbnails.get(0).url);
+                item_details.setImage(GetAllByCategoryModel.getInstance().category.videos.get(p).thumbnails.get(0));
                 results.add(item_details);
             }
         }

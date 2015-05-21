@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -76,7 +75,7 @@ public class LeftItemListBaseAdapter extends ArrayAdapter<ItemDetails> {
             public void onClick(View v) {
                     BaseActivity.baseClass.setVideoId(GetAllByCategoryModel.getInstance().category.videos.get(position).unique_id);
                     BaseActivity.baseClass.setVideoTitle(GetAllByCategoryModel.getInstance().category.videos.get(position).title);
-                    BaseActivity.baseClass.setVideoThumbnail(GetAllByCategoryModel.getInstance().category.videos.get(position).thumbnails.get(0).url);
+                    BaseActivity.baseClass.setVideoThumbnail(GetAllByCategoryModel.getInstance().category.videos.get(position).thumbnails.get(0));
                     BaseActivity.baseClass.setVideoPlayerLink(GetAllByCategoryModel.getInstance().category.videos.get(position).player_url);
                     BaseActivity.baseClass.setVideoDuraion(GetAllByCategoryModel.getInstance().category.videos.get(position).duration);
                     BaseActivity.baseClass.setVideoViewer(GetAllByCategoryModel.getInstance().category.videos.get(position).view_count);

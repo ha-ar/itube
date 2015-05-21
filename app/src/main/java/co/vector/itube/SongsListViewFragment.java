@@ -73,30 +73,37 @@ public class SongsListViewFragment extends Fragment {
                     searchResults = yc.search("Hindi Songs");
                     handler.post(new Runnable(){
                         public void run(){
+                            ArrayList<ItemDetails> image_details = GetSearchResults();
+                            songListViewAdapter = new SongListViewAdapter(
+                                    getActivity(),R.layout.layout_songs_list_maker, image_details);
+                            list_songs.setAdapter(songListViewAdapter);
+//                            songListViewAdapter.notifyDataSetChanged();
 
                             Log.e("done", "getting videos done");
                         }
                     });
                 }
             }.start();
-        list_songs.setOnScrollListener(new EndlessScrollListener() {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount) {
-                // Triggered only when new data needs to be appended to the list
-                // Add whatever code is needed to append new items to your AdapterView
-                index=page;
-                if(baseClass.getDataBy().equalsIgnoreCase("Category")) {
-                    obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), baseClass.getAUTH_TOKEN(), index, true,
-                            new CallBack(SongsListViewFragment.this, "GetAllBy" + baseClass.getCategory() + "More"));
-                }
-                else
-                {
-                    obj.getbysearch(Query, baseClass.getAUTH_TOKEN(), index, true,
-                            new CallBack(SongsListViewFragment.this, "GetAllBySearchMore"));
-                }
-                // or customLoadMoreDataFromApi(totalItemsCount);
-            }
-        });
+
+        //TODO will implement it later when all things will be fixed
+//        list_songs.setOnScrollListener(new EndlessScrollListener() {
+//            @Override
+//            public void onLoadMore(int page, int totalItemsCount) {
+//                // Triggered only when new data needs to be appended to the list
+//                // Add whatever code is needed to append new items to your AdapterView
+//                index=page;
+//                if(baseClass.getDataBy().equalsIgnoreCase("Category")) {
+//                    obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), baseClass.getAUTH_TOKEN(), index, true,
+//                            new CallBack(SongsListViewFragment.this, "GetAllBy" + baseClass.getCategory() + "More"));
+//                }
+//                else
+//                {
+//                    obj.getbysearch(Query, baseClass.getAUTH_TOKEN(), index, true,
+//                            new CallBack(SongsListViewFragment.this, "GetAllBySearchMore"));
+//                }
+//                // or customLoadMoreDataFromApi(totalItemsCount);
+//            }
+//        });
         //footerView = (LinearLayout) rootView.findViewById(R.id.footer);
         if(!BaseClass.isTabletDevice(getActivity()))
         {
@@ -141,10 +148,10 @@ public class SongsListViewFragment extends Fragment {
             }
         });
         PrepareDropDown();
-        aq = new AQuery(getActivity(),rootView);
-        obj = new GetByAllCategoryService(getActivity());
-        obj.getbycategory(baseClass.getNewCategory(),baseClass.getDuration(), baseClass.getAUTH_TOKEN(),index,true,
-                new CallBack(this, "GetAllBy" + baseClass.getCategory()));
+//        aq = new AQuery(getActivity(),rootView);
+//        obj = new GetByAllCategoryService(getActivity());
+//        obj.getbycategory(baseClass.getNewCategory(),baseClass.getDuration(), baseClass.getAUTH_TOKEN(),index,true,
+//                new CallBack(this, "GetAllBy" + baseClass.getCategory()));
 
 //        footerView.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -172,7 +179,7 @@ public class SongsListViewFragment extends Fragment {
                 startActivity(new Intent(getActivity(),YoutubeBaseActivity.class));
                 baseClass.setVideoId(GetAllByCategoryModel.getInstance().category.videos.get(position).unique_id);
                 baseClass.setVideoTitle(GetAllByCategoryModel.getInstance().category.videos.get(position).title);
-                baseClass.setVideoThumbnail(GetAllByCategoryModel.getInstance().category.videos.get(position).thumbnails.get(0).url);
+                baseClass.setVideoThumbnail(GetAllByCategoryModel.getInstance().category.videos.get(position).thumbnails.get(0));
                 baseClass.setVideoPlayerLink(GetAllByCategoryModel.getInstance().category.videos.get(position).player_url);
                 baseClass.setVideoDuraion(GetAllByCategoryModel.getInstance().category.videos.get(position).duration);
                 baseClass.setVideoUploadDate(GetAllByCategoryModel.getInstance().category.videos.get(position).uploaded_at);
@@ -414,7 +421,7 @@ Log.e("Size",String.valueOf(GetAllByCategoryModel.getInstance().category.videos.
             item_details.setViewer(GetAllByCategoryModel.getInstance().category.videos.get(p).view_count);
             item_details.setduration(GetAllByCategoryModel.getInstance().category.videos.get(p).duration);
             item_details.setUploaddate(GetAllByCategoryModel.getInstance().category.videos.get(p).uploaded_at);
-            item_details.setImage(GetAllByCategoryModel.getInstance().category.videos.get(p).thumbnails.get(0).url);
+            item_details.setImage(GetAllByCategoryModel.getInstance().category.videos.get(p).thumbnails.get(0));
             results.add(item_details);
         }
         return results;
