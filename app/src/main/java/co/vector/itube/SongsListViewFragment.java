@@ -1,6 +1,7 @@
 package co.vector.itube;
 
 import android.app.Fragment;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
@@ -22,7 +23,18 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.androidquery.AQuery;
+import com.androidquery.callback.AjaxCallback;
+import com.androidquery.callback.AjaxStatus;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.SearchListResponse;
+import com.google.api.services.youtube.model.SearchResult;
+import com.google.gson.Gson;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +44,7 @@ import DB.Favorite;
 import DB.FavoriteDao;
 import DB.Playlist;
 import DB.PlaylistDao;
+import Models.DurationModel;
 import Models.GetAllByCategoryModel;
 import Models.VideoItem;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
@@ -49,7 +62,8 @@ public class SongsListViewFragment extends Fragment {
     View rootView;static  int SelectedId;  String popUpContents[];static String Query;
     static GridView list_songs;static int index;
     GetByAllCategoryService obj;
-    private List<VideoItem> searchResults;
+    ArrayList<ItemDetailsDuration> image_details_duration;
+    ArrayList<ItemDetails> image_details;
 
     public SongsListViewFragment() {
     }
@@ -62,48 +76,33 @@ public class SongsListViewFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
+
         index =1;
         rootView = inflater.inflate(R.layout.layout_songslistview,
                 container, false);
         list_songs = (GridView) rootView.findViewById(R.id.listView);
-        final Handler handler = new Handler();
-            new Thread(){
-                public void run(){
-                    YoutubeConnector yc = new YoutubeConnector(getActivity());
-                    searchResults = yc.search("Hindi Songs");
-                    handler.post(new Runnable(){
-                        public void run(){
-                            ArrayList<ItemDetails> image_details = GetSearchResults();
-                            songListViewAdapter = new SongListViewAdapter(
-                                    getActivity(),R.layout.layout_songs_list_maker, image_details);
-                            list_songs.setAdapter(songListViewAdapter);
-//                            songListViewAdapter.notifyDataSetChanged();
-
-                            Log.e("done", "getting videos done");
-                        }
-                    });
-                }
-            }.start();
-
+        aq = new AQuery(getActivity(),rootView);
         //TODO will implement it later when all things will be fixed
-//        list_songs.setOnScrollListener(new EndlessScrollListener() {
-//            @Override
-//            public void onLoadMore(int page, int totalItemsCount) {
-//                // Triggered only when new data needs to be appended to the list
-//                // Add whatever code is needed to append new items to your AdapterView
-//                index=page;
-//                if(baseClass.getDataBy().equalsIgnoreCase("Category")) {
-//                    obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), baseClass.getAUTH_TOKEN(), index, true,
-//                            new CallBack(SongsListViewFragment.this, "GetAllBy" + baseClass.getCategory() + "More"));
-//                }
-//                else
-//                {
-//                    obj.getbysearch(Query, baseClass.getAUTH_TOKEN(), index, true,
-//                            new CallBack(SongsListViewFragment.this, "GetAllBySearchMore"));
-//                }
-//                // or customLoadMoreDataFromApi(totalItemsCount);
-//            }
-//        });
+        list_songs.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount) {
+
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to your AdapterView
+                index=page;
+                if(baseClass.getDataBy().equalsIgnoreCase("Category")) {
+                    obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(),
+                            GetAllByCategoryModel.getInstance().nextPageToken,  true,
+                            new CallBack(SongsListViewFragment.this, "GetAllBy" + baseClass.getCategory() + "More"));
+                }
+                else
+                {
+                    obj.getbysearch(Query, GetAllByCategoryModel.getInstance().nextPageToken, true,
+                            new CallBack(SongsListViewFragment.this, "GetAllBySearchMore"));
+                }
+                // or customLoadMoreDataFromApi(totalItemsCount);
+            }
+        });
         //footerView = (LinearLayout) rootView.findViewById(R.id.footer);
         if(!BaseClass.isTabletDevice(getActivity()))
         {
@@ -124,7 +123,7 @@ public class SongsListViewFragment extends Fragment {
                     imm.hideSoftInputFromWindow(BaseActivity.searchView.getWindowToken(), 0);
                 Query = query;
                 obj = new GetByAllCategoryService(getActivity());
-                obj.getbysearch(query, baseClass.getAUTH_TOKEN(), index, true,
+                obj.getbysearch(query,  GetAllByCategoryModel.getInstance().nextPageToken, true,
                         new CallBack(SongsListViewFragment.this, "GetAllBySearch"));
                 }catch (NullPointerException e){}
                 return false;
@@ -148,10 +147,10 @@ public class SongsListViewFragment extends Fragment {
             }
         });
         PrepareDropDown();
-//        aq = new AQuery(getActivity(),rootView);
-//        obj = new GetByAllCategoryService(getActivity());
-//        obj.getbycategory(baseClass.getNewCategory(),baseClass.getDuration(), baseClass.getAUTH_TOKEN(),index,true,
-//                new CallBack(this, "GetAllBy" + baseClass.getCategory()));
+
+        obj = new GetByAllCategoryService(getActivity());
+        obj.getbycategory(baseClass.getNewCategory(),baseClass.getDuration(), "",true,
+                new CallBack(SongsListViewFragment.this, "GetAllBy" + baseClass.getCategory()));
 
 //        footerView.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -177,14 +176,11 @@ public class SongsListViewFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 startActivity(new Intent(getActivity(),YoutubeBaseActivity.class));
-                baseClass.setVideoId(GetAllByCategoryModel.getInstance().category.videos.get(position).unique_id);
-                baseClass.setVideoTitle(GetAllByCategoryModel.getInstance().category.videos.get(position).title);
-                baseClass.setVideoThumbnail(GetAllByCategoryModel.getInstance().category.videos.get(position).thumbnails.get(0));
-                baseClass.setVideoPlayerLink(GetAllByCategoryModel.getInstance().category.videos.get(position).player_url);
-                baseClass.setVideoDuraion(GetAllByCategoryModel.getInstance().category.videos.get(position).duration);
-                baseClass.setVideoUploadDate(GetAllByCategoryModel.getInstance().category.videos.get(position).uploaded_at);
-                baseClass.setVideoAuthor(GetAllByCategoryModel.getInstance().category.videos.get(position).author.name);
-                baseClass.setVideoViewer(GetAllByCategoryModel.getInstance().category.videos.get(position).view_count);
+                baseClass.setVideoId(GetAllByCategoryModel.getInstance().items.get(position).videoId.vedioid);
+                baseClass.setVideoTitle(GetAllByCategoryModel.getInstance().items.get(position).snippet.VideoTitle);
+                baseClass.setVideoThumbnail(GetAllByCategoryModel.getInstance().items.get(position).snippet.thumbnails.aDefault.url);
+                baseClass.setVideoPlayerLink("https://www.youtube.com/v/"+GetAllByCategoryModel.getInstance().items.get(position).videoId.vedioid);
+                baseClass.setVideoDuraion(DurationModel.getInstance().items.get(position).contentDetails.duration);
                 SelectedId = position;
             }
         });
@@ -192,14 +188,14 @@ public class SongsListViewFragment extends Fragment {
     }
     public void GetAllBySearch(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().setList((GetAllByCategoryModel) model);
-        Log.e("s",GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
+        GetDurationDetail();
+        if (GetAllByCategoryModel.getInstance().items.size()==0) {
             Log.e("Index",String.valueOf(index));
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-                songListViewAdapter = new SongListViewAdapter(
-                        getActivity(),R.layout.layout_songs_list_maker, image_details);
+            image_details = GetSearchResults();
+//                songListViewAdapter = new SongListViewAdapter(
+//                        getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             list_songs.setAdapter(songListViewAdapter);
-            if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
+            if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
             aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
             aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
@@ -211,57 +207,50 @@ public class SongsListViewFragment extends Fragment {
     }
     public void GetAllBySearchMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        Log.e("s",GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
+        GetDurationDetail();
             Log.e("Index",String.valueOf(index));
-            ArrayList<ItemDetails> image_details = GetSearchResults();
+            image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
-                        getActivity(),R.layout.layout_songs_list_maker, image_details);
+                        getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             songListViewAdapter.notifyDataSetChanged();
-            if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
+            if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
-        }
     }
     public void GetAllByMovies(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().setList((GetAllByCategoryModel) model);
-        Log.e("s",GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
+
+        //if (GetAllByCategoryModel.getInstance().items.size()==0) {
                 Log.e("Index",String.valueOf(index));
-                ArrayList<ItemDetails> image_details = GetSearchResults();
+                image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
-                        getActivity(),R.layout.layout_songs_list_maker, image_details);
+                        getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
                 list_songs.setAdapter(songListViewAdapter);
-            if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
+            GetDurationDetail();
+            if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
-        }
+//        } else {
+//            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
+//            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
+//        }
     }
     public void GetAllByMoviesMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        Log.e("s",GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
+        GetDurationDetail();
                 Log.e("Index",String.valueOf(index));
-                ArrayList<ItemDetails> image_details = GetSearchResults();
+                image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
-                        getActivity(),R.layout.layout_songs_list_maker, image_details);
+                        getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
                 songListViewAdapter.notifyDataSetChanged();
-            if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
+
+            if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
-        }
+
     }
     private  void PrepareDropDown()
     {
@@ -307,121 +296,131 @@ public class SongsListViewFragment extends Fragment {
     }
     public void GetAllByCartoons(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().setList((GetAllByCategoryModel) model);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-
+        GetDurationDetail();
+            image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
-                        getActivity(),R.layout.layout_songs_list_maker, image_details);
+                        getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             list_songs.setAdapter(songListViewAdapter);
-            if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
+            if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
-        }
+
     }
     public void GetAllByCartoonsMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        Log.e("s",GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
+        GetDurationDetail();
             Log.e("Index",String.valueOf(index));
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-                songListViewAdapter = new SongListViewAdapter(
-                        getActivity(),R.layout.layout_songs_list_maker, image_details);
+        image_details = GetSearchResults();
+        songListViewAdapter = new SongListViewAdapter(
+                getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             songListViewAdapter.notifyDataSetChanged();
-            if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
+            if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
-        }
+
     }
     public void GetAllByMusic(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().setList((GetAllByCategoryModel) model);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-                songListViewAdapter = new SongListViewAdapter(
-                        getActivity(),R.layout.layout_songs_list_maker, image_details);
+        GetDurationDetail();
+            image_details = GetSearchResults();
+            songListViewAdapter = new SongListViewAdapter(
+                    getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             list_songs.setAdapter(songListViewAdapter);
-            if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
+            if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
-        }
+
     }
     public void GetAllByMusicMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        Log.e("s",GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
-            Log.e("Index",String.valueOf(index));
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-                songListViewAdapter = new SongListViewAdapter(
-                        getActivity(),R.layout.layout_songs_list_maker, image_details);
+        GetDurationDetail();
+        image_details = GetSearchResults();
+        songListViewAdapter = new SongListViewAdapter(
+                getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             songListViewAdapter.notifyDataSetChanged();
-            if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
+            if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
-        }
+
     }
     public void GetAllByDocumentaries(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().setList((GetAllByCategoryModel) model);
-
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-                songListViewAdapter = new SongListViewAdapter(
-                        getActivity(),R.layout.layout_songs_list_maker, image_details);
+        GetDurationDetail();
+            image_details = GetSearchResults();
+            songListViewAdapter = new SongListViewAdapter(
+                    getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             list_songs.setAdapter(songListViewAdapter);
-            if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
+            if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
-        }
+
     }
     public void GetAllByDocumentariesMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        Log.e("s",GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
-            Log.e("Index",String.valueOf(index));
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-                songListViewAdapter = new SongListViewAdapter(
-                        getActivity(),R.layout.layout_songs_list_maker, image_details);
+        GetDurationDetail();
+        image_details = GetSearchResults();
+        songListViewAdapter = new SongListViewAdapter(
+                getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             songListViewAdapter.notifyDataSetChanged();
-            if(GetAllByCategoryModel.getInstance().category.total_result_count.equals("1000000"))
+            if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
+
+    }
+    public void GetDurationDetail ()
+    {
+        int count = baseClass.getDurationCounter();
+
+            for (int loop=count;loop<count + 50;loop++) {
+                    obj.getduration(GetAllByCategoryModel.getInstance().items.get(loop).videoId.vedioid, false,
+                            new CallBack(SongsListViewFragment.this, "GetDuration"));
+            }
+            baseClass.setDurationCounter(count + 50);
+
+    }
+    public void GetDuration(Object caller, Object model) {
+
+        if( DurationModel.getInstance().items.size()==0) {
+            DurationModel.getInstance().setList((DurationModel) model);
+        }else
+        {
+            DurationModel.getInstance().appendList((DurationModel) model);
         }
+        image_details_duration = GetSearchResultsDuration();
+        songListViewAdapter = new SongListViewAdapter(
+                getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
+        songListViewAdapter.notifyDataSetInvalidated();
+    }
+    static int p1;
+    private static ArrayList<ItemDetailsDuration> GetSearchResultsDuration() {
+
+        ArrayList<ItemDetailsDuration> results = new ArrayList<ItemDetailsDuration>();
+        for (p1 = 0; p1 < DurationModel.getInstance().items.size(); p1++) {
+            ItemDetailsDuration item_details = new ItemDetailsDuration();
+            item_details.setDuration(getTimeFromString(DurationModel.getInstance().items.get(p1).contentDetails.duration));
+            Log.e("Time"+p1,getTimeFromString(DurationModel.getInstance().items.get(p1).contentDetails.duration));
+            results.add(item_details);
+        }
+        return results;
     }
     static int p;
-
     private static ArrayList<ItemDetails> GetSearchResults() {
-Log.e("Size",String.valueOf(GetAllByCategoryModel.getInstance().category.videos.size()));
         ArrayList<ItemDetails> results = new ArrayList<ItemDetails>();
-        for (p = 0; p < GetAllByCategoryModel.getInstance().category.videos.size(); p++) {
+        for (p = 0; p < GetAllByCategoryModel.getInstance().items.size(); p++) {
             ItemDetails item_details = new ItemDetails();
-            item_details.setName(GetAllByCategoryModel.getInstance().category.videos.get(p).title);
-            item_details.setAuthor(GetAllByCategoryModel.getInstance().category.videos.get(p).author.name);
-            item_details.setViewer(GetAllByCategoryModel.getInstance().category.videos.get(p).view_count);
-            item_details.setduration(GetAllByCategoryModel.getInstance().category.videos.get(p).duration);
-            item_details.setUploaddate(GetAllByCategoryModel.getInstance().category.videos.get(p).uploaded_at);
-            item_details.setImage(GetAllByCategoryModel.getInstance().category.videos.get(p).thumbnails.get(0));
+                item_details.setId(GetAllByCategoryModel.getInstance().items.get(p).videoId.vedioid);
+
+            item_details.setName(GetAllByCategoryModel.getInstance().items.get(p).snippet.VideoTitle);
+            try {
+                item_details.setduration(getTimeFromString(DurationModel.getInstance().items.get(p).contentDetails.duration));
+            }catch (IndexOutOfBoundsException e){}
+            item_details.setImage(GetAllByCategoryModel.getInstance().items.get(p).snippet.thumbnails.aDefault.url);
             results.add(item_details);
         }
         return results;
@@ -496,6 +495,120 @@ Log.e("Size",String.valueOf(GetAllByCategoryModel.getInstance().category.videos.
     public void onDestroy() {
         super.onDestroy();
         BaseActivity.language.setText("Select Category");
+    }
+
+//    public void search(String keywords){
+//
+//        query.setQ(keywords);
+//        try{
+//            SearchListResponse response = query.execute();
+//            Log.e("response", response.toPrettyString());
+//            final List<SearchResult> results = response.getItems();
+//
+//            List<VideoItem> items = new ArrayList<VideoItem>();
+//            objModel = GetAllByCategoryModel.getInstance();
+//            objModel.category.max_result_count = response.getPageInfo().getTotalResults();
+//
+//            for(int loop=0;loop< results.size();loop++){
+//                video = new GetAllByCategoryModel.Videos();
+//                video.title = results.get(loop).getSnippet().getTitle();
+//                video.description = results.get(loop).getSnippet().getDescription();
+//                video.thumbnails.add(results.get(loop).getSnippet().getThumbnails().getDefault().getUrl());
+//                video.player_url = results.get(loop).getId().getVideoId();
+//                video.uploaded_at = results.get(loop).getSnippet().getPublishedAt().toStringRfc3339();
+//
+//                String url = "https://www.googleapis.com/youtube/v3/videos?id="+video.player_url+"&part=contentDetails&key=AIzaSyBTarcxurznZvnN9kZW9ekWe7JyQsLSLCo";
+//                aq.ajax(url, String.class,
+//                        new AjaxCallback<String>() {
+//                            @Override
+//                            public void callback(String url, String json,
+//                                                 AjaxStatus status) {
+//                                if (json != null) {
+//                                    Gson gson = new Gson();
+//                                    DurationModel obj1 = new DurationModel();
+//                                    obj1 = gson.fromJson(json.toString(),
+//                                            DurationModel.class);
+//                                    DurationModel.getInstance().setList(
+//                                            obj1);
+//                                    duration.add(getTimeFromString(DurationModel.getInstance().items.get(0).contentDetails.duration));
+//                                    ArrayList<ItemDetails> image_details = GetSearchResults();
+//                                    songListViewAdapter = new SongListViewAdapter(
+//                                            getActivity(),R.layout.layout_songs_list_maker, image_details);
+//                                    list_songs.setAdapter(songListViewAdapter);
+//                                    songListViewAdapter.notifyDataSetChanged();
+//                                    progressDialog.dismiss();
+//                                    Log.e("Time",video.duration);
+//                                }
+//                            }
+//                        });
+//
+//                objModel.category.videos.add(video);
+//
+//
+////				VideoItem item = new VideoItem();
+////				item.setTitle(result.getSnippet().getTitle());
+////				item.setDescription(result.getSnippet().getDescription());
+////				item.setThumbnailURL(result.getSnippet().getThumbnails().getDefault().getUrl());
+////				item.setId(result.getId().getVideoId());
+////				items.add(item);
+//            }
+//            Log.e("Youtube Connector size", GetAllByCategoryModel.getInstance().category.videos.size()+"");
+//        }catch(IOException e){
+//            Log.d("YC", "Could not search: "+e);
+//        }
+//    }
+    private static String getTimeFromString(String duration) {
+        // TODO Auto-generated method stub
+        String time = "";
+        boolean hourexists = false, minutesexists = false, secondsexists = false;
+        if (duration.contains("H"))
+            hourexists = true;
+        if (duration.contains("M"))
+            minutesexists = true;
+        if (duration.contains("S"))
+            secondsexists = true;
+        if (hourexists) {
+            String hour = "";
+            hour = duration.substring(duration.indexOf("T") + 1,
+                    duration.indexOf("H"));
+            if (hour.length() == 1)
+                hour = "0" + hour;
+            time += hour + ":";
+        }
+        if (minutesexists) {
+            String minutes = "";
+            if (hourexists)
+                minutes = duration.substring(duration.indexOf("H") + 1,
+                        duration.indexOf("M"));
+            else
+                minutes = duration.substring(duration.indexOf("T") + 1,
+                        duration.indexOf("M"));
+            if (minutes.length() == 1)
+                minutes = "0" + minutes;
+            time += minutes + ":";
+        } else {
+            time += "00:";
+        }
+        if (secondsexists) {
+            String seconds = "";
+            if (hourexists) {
+                if (minutesexists)
+                    seconds = duration.substring(duration.indexOf("M") + 1,
+                            duration.indexOf("S"));
+                else
+                    seconds = duration.substring(duration.indexOf("H") + 1,
+                            duration.indexOf("S"));
+            } else if (minutesexists)
+                seconds = duration.substring(duration.indexOf("M") + 1,
+                        duration.indexOf("S"));
+            else
+                seconds = duration.substring(duration.indexOf("T") + 1,
+                        duration.indexOf("S"));
+            if (seconds.length() == 1)
+                seconds = "0" + seconds;
+            time += seconds;
+        }
+        return time;
     }
 //    public String CalculateTotalResults()
 //    {

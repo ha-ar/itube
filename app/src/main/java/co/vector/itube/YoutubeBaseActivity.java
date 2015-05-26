@@ -44,6 +44,7 @@ import DB.FavoriteDao;
 import DB.Playlist;
 import DB.PlaylistDao;
 import Models.AdsMessage;
+import Models.DurationModel;
 import Models.GetAllByCategoryModel;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
@@ -76,6 +77,9 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
     String videoId, videoTitle, videoPlayerlink, videoDuration, videoViewer, videothumbnail;
     GetByAllCategoryService obj;
     LinearLayout listLinear;RelativeLayout listRelative;Activity activity;
+
+    ArrayList<ItemDetailsDuration> image_details_duration;
+    ArrayList<ItemDetails> image_details;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -186,10 +190,12 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
                 index=page;
                 obj = new GetByAllCategoryService(activity);
                 if (baseClass.getDataBy().equalsIgnoreCase("Category")) {
-                    obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), baseClass.getAUTH_TOKEN(), index, true,
+                    obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(),
+                            GetAllByCategoryModel.getInstance().nextPageToken, true,
                             new CallBack(activity, "GetAllBy" + baseClass.getCategory() + "More"));
                 } else {
-                    obj.getbysearch(SongsListViewFragment.Query, baseClass.getAUTH_TOKEN(), index, true,
+                    obj.getbysearch(SongsListViewFragment.Query,
+                            GetAllByCategoryModel.getInstance().nextPageToken, true,
                             new CallBack(activity, "GetAllBySearchMore"));
                 }
             }
@@ -200,21 +206,19 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
                 mPlayer = baseClass.getYOUTUBE();
                 if (!baseClass.getIsFromFavorites().equalsIgnoreCase("YES")) {
                     try {
-                        position = position + 1;
-                        videoId = GetAllByCategoryModel.getInstance().category.videos.get(position).unique_id;
-                        videoTitle = GetAllByCategoryModel.getInstance().category.videos.get(position).title;
-                        videoPlayerlink = GetAllByCategoryModel.getInstance().category.videos.get(position).player_url;
-                        videothumbnail = GetAllByCategoryModel.getInstance().category.videos.get(position).thumbnails.get(0);
-                        videoDuration = GetAllByCategoryModel.getInstance().category.videos.get(position).duration;
-                        videoViewer = GetAllByCategoryModel.getInstance().category.videos.get(position).view_count;
+                        if(SongsListViewFragment.SelectedId  < position+1) {
+                            position = position + 1;
+                        }
+                        videoId = GetAllByCategoryModel.getInstance().items.get(position).videoId.vedioid;
+                        videoTitle = GetAllByCategoryModel.getInstance().items.get(position).snippet.VideoTitle;
+                        videoPlayerlink = "https://www.youtube.com/v/"+GetAllByCategoryModel.getInstance().items.get(position).videoId.vedioid;
+                        videothumbnail = GetAllByCategoryModel.getInstance().items.get(position).snippet.thumbnails.aDefault.url;
+                        videoDuration = DurationModel.getInstance().items.get(position).contentDetails.duration;
                         baseClass.setVideoId(videoId);
                         baseClass.setVideoTitle(videoTitle);
                         baseClass.setVideoPlayerLink(videoPlayerlink);
                         baseClass.setVideoDuraion(videoDuration);
-                        baseClass.setVideoViewer(videoViewer);
                         baseClass.setVideoThumbnail(videothumbnail);
-                        baseClass.setVideoAuthor(GetAllByCategoryModel.getInstance().category.videos.get(position).author.name);
-                        baseClass.setVideoUploadDate(GetAllByCategoryModel.getInstance().category.videos.get(position).uploaded_at);
                         mPlayer.setFullscreenControlFlags(YouTubePlayer.FULLSCREEN_FLAG_CUSTOM_LAYOUT);
                         baseClass.setYOUTUBE(mPlayer);
                         mPlayer.loadVideo(baseClass.getVideoId());
@@ -227,9 +231,10 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
         });
         try {
             index = 0;
-            ArrayList<ItemDetails> image_details = GetSearchResults();
+            image_details = GetSearchResults();
+            image_details_duration = GetSearchResultsDuration();
             leftItemListBaseAdapter = new LeftItemListBaseAdapter(
-                    activity,R.layout.layout_songs_list_maker, image_details);
+                    this,R.layout.layout_songs_list_maker, image_details,image_details_duration);
             list.setAdapter(leftItemListBaseAdapter);
             index = SongsListViewFragment.index;
 //            footerView.setOnClickListener(new View.OnClickListener() {
@@ -268,82 +273,57 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
 
     public void GetAllBySearchMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        //  Log.e("s",GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
-            Log.e("Index", String.valueOf(index));
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-            leftItemListBaseAdapter = new LeftItemListBaseAdapter(
-                    this,R.layout.layout_songs_list_maker, image_details);
+        GetDurationDetail();
+            image_details = GetSearchResults();
+        leftItemListBaseAdapter = new LeftItemListBaseAdapter(
+                this,R.layout.layout_songs_list_maker, image_details,image_details_duration);
             leftItemListBaseAdapter.notifyDataSetChanged();
-            aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No " + baseClass.getCategory() + " record found.");
-            Toast.makeText(this, "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
-        }
+            aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().pageInfo.totalResults);
+
     }
 
     public void GetAllByMoviesMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        Log.e("s", GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
-            Log.e("Index", String.valueOf(index));
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-            leftItemListBaseAdapter = new LeftItemListBaseAdapter(
-                    this,R.layout.layout_songs_list_maker, image_details);
+        GetDurationDetail();
+            image_details = GetSearchResults();
+        leftItemListBaseAdapter = new LeftItemListBaseAdapter(
+                this,R.layout.layout_songs_list_maker, image_details,image_details_duration);
             leftItemListBaseAdapter.notifyDataSetChanged();
-            aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No " + baseClass.getCategory() + " record found.");
-            Toast.makeText(this, "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
-        }
+            aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().pageInfo.totalResults);
+
     }
 
     public void GetAllByCartoonsMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        Log.e("s", GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
-            Log.e("Index", String.valueOf(index));
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-            leftItemListBaseAdapter = new LeftItemListBaseAdapter(
-                    this,R.layout.layout_songs_list_maker, image_details);
+        GetDurationDetail();
+            image_details = GetSearchResults();
+        leftItemListBaseAdapter = new LeftItemListBaseAdapter(
+                this,R.layout.layout_songs_list_maker, image_details,image_details_duration);
             leftItemListBaseAdapter.notifyDataSetChanged();
-            aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No " + baseClass.getCategory() + " record found.");
-            Toast.makeText(this, "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
-        }
+            aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().pageInfo.totalResults);
+
     }
 
     public void GetAllByMusicMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        Log.e("s", GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
-            Log.e("Index", String.valueOf(index));
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-            leftItemListBaseAdapter = new LeftItemListBaseAdapter(
-                    this,R.layout.layout_songs_list_maker, image_details);
+        GetDurationDetail();
+            image_details = GetSearchResults();
+        leftItemListBaseAdapter = new LeftItemListBaseAdapter(
+                this,R.layout.layout_songs_list_maker, image_details,image_details_duration);
             leftItemListBaseAdapter.notifyDataSetChanged();
-            aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No " + baseClass.getCategory() + " record found.");
-            Toast.makeText(this, "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
-        }
+            aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().pageInfo.totalResults);
+
     }
 
     public void GetAllByDocumentariesMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        Log.e("s", GetAllByCategoryModel.getInstance().success);
-        if (GetAllByCategoryModel.getInstance().success.equalsIgnoreCase("true")) {
-            Log.e("Index", String.valueOf(index));
-            ArrayList<ItemDetails> image_details = GetSearchResults();
-            leftItemListBaseAdapter = new LeftItemListBaseAdapter(
-                    this,R.layout.layout_songs_list_maker, image_details);
+        GetDurationDetail();
+            image_details = GetSearchResults();
+        leftItemListBaseAdapter = new LeftItemListBaseAdapter(
+                this,R.layout.layout_songs_list_maker, image_details,image_details_duration);
             leftItemListBaseAdapter.notifyDataSetChanged();
-            aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().category.total_result_count);
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No " + baseClass.getCategory() + " record found.");
-            Toast.makeText(this, "Check internet settings or server not responding.", Toast.LENGTH_LONG).show();
-        }
+            aq.id(R.id.total_results).text("Total Results: " + GetAllByCategoryModel.getInstance().pageInfo.totalResults);
+
     }
 
     public void adsCallback(Object caller, Object model){
@@ -351,6 +331,57 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
         if(!AdsMessage.getInstance().message.isEmpty()){
             aq.id(R.id.ads).visible().text(AdsMessage.getInstance().message);
         }
+    }
+    public void GetDurationDetail ()
+    {
+        int count = baseClass.getDurationCounter();
+
+        for (int loop=count;loop<count + 50;loop++) {
+                obj.getduration(GetAllByCategoryModel.getInstance().items.get(loop).videoId.vedioid, false,
+                        new CallBack(YoutubeBaseActivity.this, "GetDuration"));
+            }
+        baseClass.setDurationCounter(count + 50);
+
+    }
+    public void GetDuration(Object caller, Object model) {
+
+        if( DurationModel.getInstance().items.size()==0) {
+            DurationModel.getInstance().setList((DurationModel) model);
+        }else
+        {
+            DurationModel.getInstance().appendList((DurationModel) model);
+        }
+        image_details_duration = GetSearchResultsDuration();
+        leftItemListBaseAdapter = new LeftItemListBaseAdapter(
+                this,R.layout.layout_songs_list_maker, image_details,image_details_duration);
+        leftItemListBaseAdapter.notifyDataSetInvalidated();
+    }
+    static int p1;
+    private static ArrayList<ItemDetailsDuration> GetSearchResultsDuration() {
+
+        ArrayList<ItemDetailsDuration> results = new ArrayList<ItemDetailsDuration>();
+        for (p1 = 0; p1 < DurationModel.getInstance().items.size(); p1++) {
+            if (SongsListViewFragment.SelectedId != p1) {
+                    ItemDetailsDuration item_details = new ItemDetailsDuration();
+                    item_details.setDuration(getTimeFromString(DurationModel.getInstance().items.get(p1).contentDetails.duration));
+                    results.add(item_details);
+            }
+        }
+        return results;
+    }
+    static int p;
+    private static ArrayList<ItemDetails> GetSearchResults() {
+
+        ArrayList<ItemDetails> results = new ArrayList<ItemDetails>();
+        for (p = 0; p < GetAllByCategoryModel.getInstance().items.size(); p++) {
+            if (SongsListViewFragment.SelectedId != p) {
+                ItemDetails item_details = new ItemDetails();
+                item_details.setName(GetAllByCategoryModel.getInstance().items.get(p).snippet.VideoTitle);
+                item_details.setImage(GetAllByCategoryModel.getInstance().items.get(p).snippet.thumbnails.aDefault.url);
+                results.add(item_details);
+            }
+        }
+        return results;
     }
 
     private void PrepareDropDown() {
@@ -363,7 +394,59 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
         popupWindow = popupWindow();
 
     }
-
+    private static String getTimeFromString(String duration) {
+        // TODO Auto-generated method stub
+        String time = "";
+        boolean hourexists = false, minutesexists = false, secondsexists = false;
+        if (duration.contains("H"))
+            hourexists = true;
+        if (duration.contains("M"))
+            minutesexists = true;
+        if (duration.contains("S"))
+            secondsexists = true;
+        if (hourexists) {
+            String hour = "";
+            hour = duration.substring(duration.indexOf("T") + 1,
+                    duration.indexOf("H"));
+            if (hour.length() == 1)
+                hour = "0" + hour;
+            time += hour + ":";
+        }
+        if (minutesexists) {
+            String minutes = "";
+            if (hourexists)
+                minutes = duration.substring(duration.indexOf("H") + 1,
+                        duration.indexOf("M"));
+            else
+                minutes = duration.substring(duration.indexOf("T") + 1,
+                        duration.indexOf("M"));
+            if (minutes.length() == 1)
+                minutes = "0" + minutes;
+            time += minutes + ":";
+        } else {
+            time += "00:";
+        }
+        if (secondsexists) {
+            String seconds = "";
+            if (hourexists) {
+                if (minutesexists)
+                    seconds = duration.substring(duration.indexOf("M") + 1,
+                            duration.indexOf("S"));
+                else
+                    seconds = duration.substring(duration.indexOf("H") + 1,
+                            duration.indexOf("S"));
+            } else if (minutesexists)
+                seconds = duration.substring(duration.indexOf("M") + 1,
+                        duration.indexOf("S"));
+            else
+                seconds = duration.substring(duration.indexOf("T") + 1,
+                        duration.indexOf("S"));
+            if (seconds.length() == 1)
+                seconds = "0" + seconds;
+            time += seconds;
+        }
+        return time;
+    }
     private PopupWindow popupWindow() {
         PopupWindow popupWindow = new PopupWindow(YoutubeBaseActivity.this);
         ListView listView = new ListView(YoutubeBaseActivity.this);
@@ -549,7 +632,7 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
                     baseClass.getVideoViewer(), baseClass.getVideoUploadDate(), baseClass.getVideoAuthor(), baseClass.getVideoThumbnail());
             favoriteDao.insert(favorite);
             daoSession.clear();
-            Log.e("id",baseClass.getVideoId());
+            Log.e("id", baseClass.getVideoId());
             ex_db.close();
             ex_database_helper_obj.close();
 //        }catch (Exception e){
@@ -664,25 +747,6 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
         return youTubePlayerView;
     }
 
-    static int p;
-
-    private static ArrayList<ItemDetails> GetSearchResults() {
-
-        ArrayList<ItemDetails> results = new ArrayList<ItemDetails>();
-        for (p = 0; p < GetAllByCategoryModel.getInstance().category.videos.size(); p++) {
-            if (SongsListViewFragment.SelectedId != p) {
-                ItemDetails item_details = new ItemDetails();
-                item_details.setName(GetAllByCategoryModel.getInstance().category.videos.get(p).title);
-                item_details.setAuthor(GetAllByCategoryModel.getInstance().category.videos.get(p).author.name);
-                item_details.setViewer(GetAllByCategoryModel.getInstance().category.videos.get(p).view_count);
-                item_details.setduration(GetAllByCategoryModel.getInstance().category.videos.get(p).duration);
-                item_details.setUploaddate(GetAllByCategoryModel.getInstance().category.videos.get(p).uploaded_at);
-                item_details.setImage(GetAllByCategoryModel.getInstance().category.videos.get(p).thumbnails.get(0));
-                results.add(item_details);
-            }
-        }
-        return results;
-    }
 
     @Override
     public void onFullscreen(boolean isFullscreen) {

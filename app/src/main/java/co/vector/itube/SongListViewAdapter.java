@@ -16,6 +16,7 @@ import com.androidquery.callback.ImageOptions;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import Models.DurationModel;
 import Models.GetAllByCategoryModel;
 
 /**
@@ -23,25 +24,31 @@ import Models.GetAllByCategoryModel;
  */
 public class SongListViewAdapter extends ArrayAdapter<ItemDetails> {
     private static ArrayList<ItemDetails> itemDetailsrrayList;
+    private static ArrayList<ItemDetailsDuration> itemDetailsrrayListDuration;
     Context ctx;
     int layoutId;
     ArrayList<String> newArrayListId;
-    private ArrayList<ItemDetails> arraylist, newArrayListdetail;
+    private ArrayList<ItemDetails> arraylist;
+    private ArrayList<ItemDetailsDuration> arraylistDuration;
 
-    public SongListViewAdapter(Context context,int image_layout, ArrayList<ItemDetails> results) {
+    public SongListViewAdapter(Context context,int image_layout, ArrayList<ItemDetails> results,
+                               ArrayList<ItemDetailsDuration> resultsDuration) {
         super(context,image_layout,  results);
         itemDetailsrrayList = results;
+        itemDetailsrrayListDuration = resultsDuration;
         arraylist = new ArrayList<ItemDetails>();
-        newArrayListdetail = new ArrayList<ItemDetails>();
+        arraylistDuration = new ArrayList<ItemDetailsDuration>();
         newArrayListId = new ArrayList<String>();
         arraylist.addAll(itemDetailsrrayList);
+        try {
+            arraylistDuration.addAll(itemDetailsrrayListDuration);
+        }catch (NullPointerException e){}
         layoutId = image_layout;
         this.ctx = context;
     }
 
     public int getCount() {
-        Log.e("from adapter size", GetAllByCategoryModel.getInstance().category.videos.size() + "");
-        return GetAllByCategoryModel.getInstance().category.videos.size();
+        return GetAllByCategoryModel.getInstance().items.size();
     }
 
     public long getItemId(int position) {
@@ -68,24 +75,24 @@ public class SongListViewAdapter extends ArrayAdapter<ItemDetails> {
             String time = null;
 //            time = itemDetailsrrayList.get(position).getduration();
 //            String splitedtiem = CalculateTime(Long.parseLong(time) * 1000);
-//            holder.txt_Name.setText(itemDetailsrrayList.get(position).getName());
-//            holder.txt_duration.setText(splitedtiem);
+            try {
+            holder.txt_Name.setText(itemDetailsrrayList.get(position).getName());
+            holder.txt_duration.setText(itemDetailsrrayListDuration.get(position).getDuration());
+
         } catch (NullPointerException npe) {
         }
         ImageOptions options = new ImageOptions();
         options.targetWidth = 200;
         aq.id(R.id.image).image(itemDetailsrrayList.get(position).getImage(), options);
+        }catch (IndexOutOfBoundsException e){}
         holder.dropDown.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                BaseActivity.baseClass.setVideoId(GetAllByCategoryModel.getInstance().category.videos.get(position).unique_id);
-                BaseActivity.baseClass.setVideoTitle(GetAllByCategoryModel.getInstance().category.videos.get(position).title);
-                BaseActivity.baseClass.setVideoThumbnail(GetAllByCategoryModel.getInstance().category.videos.get(position).thumbnails.get(0));
-                BaseActivity.baseClass.setVideoPlayerLink(GetAllByCategoryModel.getInstance().category.videos.get(position).player_url);
-                BaseActivity.baseClass.setVideoDuraion(GetAllByCategoryModel.getInstance().category.videos.get(position).duration);
-                BaseActivity.baseClass.setVideoViewer(GetAllByCategoryModel.getInstance().category.videos.get(position).view_count);
-                BaseActivity.baseClass.setVideoAuthor(GetAllByCategoryModel.getInstance().category.videos.get(position).author.name);
-                BaseActivity.baseClass.setVideoUploadDate(GetAllByCategoryModel.getInstance().category.videos.get(position).uploaded_at);
+                BaseActivity.baseClass.setVideoId(GetAllByCategoryModel.getInstance().items.get(position).videoId.vedioid);
+                BaseActivity.baseClass.setVideoTitle(GetAllByCategoryModel.getInstance().items.get(position).snippet.VideoTitle);
+                BaseActivity.baseClass.setVideoThumbnail(GetAllByCategoryModel.getInstance().items.get(position).snippet.thumbnails.aDefault.url);
+                BaseActivity.baseClass.setVideoPlayerLink("https://www.youtube.com/v/" + GetAllByCategoryModel.getInstance().items.get(position).videoId.vedioid);
+                BaseActivity.baseClass.setVideoDuraion(DurationModel.getInstance().items.get(position).contentDetails.duration);
 
                 SongsListViewFragment.popupWindow.showAsDropDown(v, -5, 0);
             }
@@ -100,15 +107,23 @@ public class SongListViewAdapter extends ArrayAdapter<ItemDetails> {
     }
 
     public void filter(String charText) {
+
         charText = charText.toLowerCase(Locale.getDefault());
         itemDetailsrrayList.clear();
+        itemDetailsrrayListDuration.clear();
 
         if (charText.length() == 0) {
             itemDetailsrrayList.addAll(arraylist);
+            itemDetailsrrayListDuration.addAll(arraylistDuration);
         } else {
-            for (ItemDetails adapter : arraylist) {
-                if (adapter.getName().toLowerCase().contains(charText)) {
-                    itemDetailsrrayList.add(adapter);
+            Log.e("TExt",charText);
+            for (int loop=0;loop<arraylist.size() ; loop++) {
+                if (arraylist.get(loop).getName().toLowerCase().contains(charText)) {
+                    Log.e("Name", arraylist.get(loop).getName() + "/" + charText);
+                    try {
+                    itemDetailsrrayList.add(arraylist.get(loop));
+                    itemDetailsrrayListDuration.add(arraylistDuration.get(loop));
+                    }catch (IndexOutOfBoundsException e){}
                 }
             }
         }

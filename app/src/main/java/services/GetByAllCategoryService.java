@@ -3,7 +3,9 @@ package services;
 import android.content.Context;
 import android.util.Log;
 
+import Models.DurationModel;
 import Models.GetAllByCategoryModel;
+import co.vector.itube.BaseClass;
 
 /**
  * Created by android on 11/11/14.
@@ -14,14 +16,19 @@ public class GetByAllCategoryService extends BaseService {
         super(ctx);
     }
 
-    public void getbycategory(String category,String duration,String token,int index,boolean message,CallBack obj) {
-        String url = Constants.BASE_URL + Constants.GETALLCATEGORY_API+"category="+category+"&duration="+duration+"&auth_token="+token+"&page="+index;
+    public void getbycategory(String category,String duration,String pagetoken,boolean message,CallBack obj) {
+        String url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q="+category+"&maxResults=50&order=relevance&type=video&pageToken="+pagetoken+"&videoDuration="+"Any"+"&key="+BaseClass.KEY;
         this.get(url, obj, GetAllByCategoryModel.getInstance(), message);
         Log.e("Url",url);
     }
-    public void getbysearch(String search_query,String token,int index,boolean message,CallBack obj) {
-        String url = Constants.BASE_URL + Constants.GETALLSEARCH_API+"auth_token="+token+"&query="+search_query+"&page="+index;
+    public void getbysearch(String search_query,String pagetoken,boolean message,CallBack obj) {
+        String url = "https://www.googleapis.com/youtube/v3/search?part=snippet&q="+search_query+"&maxResults=50&order=relevance&type=video&pageToken="+pagetoken+"&videoDuration=Any&key="+BaseClass.KEY;
         this.get(url, obj, GetAllByCategoryModel.getInstance(), message);
+        Log.e("Url",url);
+    }
+    public void getduration(String videoid,boolean message,CallBack obj) {
+        String url = "https://www.googleapis.com/youtube/v3/videos?id="+videoid+"&part=contentDetails&key="+BaseClass.KEY;
+        this.get(url, obj, DurationModel.getInstance(), message);
         Log.e("Url",url);
     }
 }

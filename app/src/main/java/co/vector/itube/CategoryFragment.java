@@ -14,6 +14,9 @@ import com.androidquery.AQuery;
 
 import java.util.ArrayList;
 
+import Models.DurationModel;
+import Models.GetAllByCategoryModel;
+
 /**
  * Created by android on 11/17/14.
  */
@@ -42,7 +45,11 @@ public class CategoryFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
+
         baseClass =((BaseClass) getActivity().getApplicationContext());
+        baseClass.setDurationCounter(0);
+        GetAllByCategoryModel.getInstance().items.clear();
+        DurationModel.getInstance().items.clear();
         if(baseClass.isTabletDevice(getActivity()))
         {
             rootView = inflater.inflate(R.layout.fragment_category_tablet,

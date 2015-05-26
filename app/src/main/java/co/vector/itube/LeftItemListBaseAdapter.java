@@ -15,22 +15,30 @@ import com.androidquery.callback.ImageOptions;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import Models.DurationModel;
 import Models.GetAllByCategoryModel;
 
 public class LeftItemListBaseAdapter extends ArrayAdapter<ItemDetails> {
     private static ArrayList<ItemDetails> itemDetailsrrayList;
+    private static ArrayList<ItemDetailsDuration> itemDetailsrrayListDuration;
     Context ctx;
     int layoutId;
     ArrayList<String> newArrayListId;
-    private ArrayList<ItemDetails> arraylist, newArrayListdetail;
+    private ArrayList<ItemDetails> arraylist;
+    private ArrayList<ItemDetailsDuration> arraylistDuration;
 
-    public LeftItemListBaseAdapter(Context context,int image_layout, ArrayList<ItemDetails> results) {
+    public LeftItemListBaseAdapter(Context context,int image_layout, ArrayList<ItemDetails> results
+    ,ArrayList<ItemDetailsDuration> resultsDuration) {
         super(context,image_layout,  results);
         itemDetailsrrayList = results;
+        itemDetailsrrayListDuration = resultsDuration;
         arraylist = new ArrayList<ItemDetails>();
-        newArrayListdetail = new ArrayList<ItemDetails>();
+        arraylistDuration = new ArrayList<ItemDetailsDuration>();
         newArrayListId = new ArrayList<String>();
         arraylist.addAll(itemDetailsrrayList);
+        try {
+            arraylistDuration.addAll(itemDetailsrrayListDuration);
+        }catch (NullPointerException e){}
         layoutId = image_layout;
         this.ctx = context;
     }
@@ -61,11 +69,13 @@ public class LeftItemListBaseAdapter extends ArrayAdapter<ItemDetails> {
         }
         AQuery aq = new AQuery(convertView);
         try {
-            String time = null;
-            time = itemDetailsrrayList.get(position).getduration();
-            String splitedtiem = CalculateTime(Long.parseLong(time) * 1000);
+//            String time = null;
+//            time = itemDetailsrrayList.get(position).getduration();
+//            String splitedtiem = CalculateTime(Long.parseLong(time) * 1000);
             holder.txt_Name.setText(itemDetailsrrayList.get(position).getName());
-            holder.txt_duration.setText(splitedtiem);
+            try {
+                holder.txt_duration.setText(itemDetailsrrayListDuration.get(position).getDuration());
+            }catch (IndexOutOfBoundsException e){}
         }catch (NullPointerException npe){}
         ImageOptions options = new ImageOptions();
         options.targetWidth = 200;
@@ -73,14 +83,11 @@ public class LeftItemListBaseAdapter extends ArrayAdapter<ItemDetails> {
         holder.dropDown.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                    BaseActivity.baseClass.setVideoId(GetAllByCategoryModel.getInstance().category.videos.get(position).unique_id);
-                    BaseActivity.baseClass.setVideoTitle(GetAllByCategoryModel.getInstance().category.videos.get(position).title);
-                    BaseActivity.baseClass.setVideoThumbnail(GetAllByCategoryModel.getInstance().category.videos.get(position).thumbnails.get(0));
-                    BaseActivity.baseClass.setVideoPlayerLink(GetAllByCategoryModel.getInstance().category.videos.get(position).player_url);
-                    BaseActivity.baseClass.setVideoDuraion(GetAllByCategoryModel.getInstance().category.videos.get(position).duration);
-                    BaseActivity.baseClass.setVideoViewer(GetAllByCategoryModel.getInstance().category.videos.get(position).view_count);
-                    BaseActivity.baseClass.setVideoAuthor(GetAllByCategoryModel.getInstance().category.videos.get(position).author.name);
-                    BaseActivity.baseClass.setVideoUploadDate(GetAllByCategoryModel.getInstance().category.videos.get(position).uploaded_at);
+                    BaseActivity.baseClass.setVideoId(GetAllByCategoryModel.getInstance().items.get(position).videoId.vedioid);
+                    BaseActivity.baseClass.setVideoTitle(GetAllByCategoryModel.getInstance().items.get(position).snippet.VideoTitle);
+                    BaseActivity.baseClass.setVideoThumbnail(GetAllByCategoryModel.getInstance().items.get(position).snippet.thumbnails.aDefault.url);
+                    BaseActivity.baseClass.setVideoPlayerLink("https://www.youtube.com/v/"+GetAllByCategoryModel.getInstance().items.get(position).videoId.vedioid);
+                    BaseActivity.baseClass.setVideoDuraion(DurationModel.getInstance().items.get(position).contentDetails.duration);
 
                 YoutubeBaseActivity.popupWindow.showAsDropDown(v, -5, 0);
             }

@@ -48,11 +48,12 @@ public class BaseClass extends Application {
     public SharedPreferences.Editor prefsEditor;
     private int Position = 0;
     public String SHARED_NAME = "co.vector.farseireader";
-
+    public static final String KEY = "AIzaSyBTarcxurznZvnN9kZW9ekWe7JyQsLSLCo";
     //Shared preferences tags
     private String GCM_ID = "";
     private String IsFromFavorites = "IsFromFavorites";
     private String AUTH_TOKEN = "auth_token";
+    private int DurationCounter = 0;
     private String Email = "Email";
     private String Category = "Category";
     private String NewCategory = "NewCategory";
@@ -169,6 +170,13 @@ public class BaseClass extends Application {
                 TypedValue.COMPLEX_UNIT_DIP, val, ctx.getResources()
                         .getDisplayMetrics());
     }
+    public void setDurationCounter(int checkDuration){
+        DurationCounter= checkDuration;
+    }
+    public int getDurationCounter(){
+        return DurationCounter;
+    }
+
     public void setAUTH_TOKEN(String uuid){
         prefsEditor.putString(AUTH_TOKEN, uuid).commit();
     }

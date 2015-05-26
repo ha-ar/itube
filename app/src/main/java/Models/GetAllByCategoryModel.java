@@ -11,7 +11,7 @@ public class GetAllByCategoryModel {
 
     private static GetAllByCategoryModel _obj = null;
 
-    private GetAllByCategoryModel() {
+    public GetAllByCategoryModel() {
 
     }
 
@@ -27,61 +27,53 @@ public class GetAllByCategoryModel {
     }
 
     public void appendList(GetAllByCategoryModel obj) {
-        for(Videos data : obj.category.videos)
-            if(!_obj.category.videos.contains(data))
-                _obj.category.videos.add(data);
+        _obj.nextPageToken = obj.nextPageToken;
+        for(Items data : obj.items)
+            if(!_obj.items.contains(data))
+                _obj.items.add(data);
     }
-    @SerializedName("success")
-    public String success;
+    @SerializedName("nextPageToken")
+    public String nextPageToken;
 
-    @SerializedName("category")
-    public Category category = new Category();
+    @SerializedName("pageInfo")
+    public PageInfo pageInfo = new PageInfo();
 
+    @SerializedName("items")
+    public ArrayList<Items> items = new ArrayList<Items>();
 
-    public class Category {
-        public String feed_id ;
-        public String updated_at;
-        public String total_result_count;
-        public String offset;
-        public int max_result_count;
-        @SerializedName("videos")
-        public ArrayList<Videos> videos = new ArrayList<Videos>();
+    public static class Items {
+        @SerializedName("id")
+        public VideoId videoId = new VideoId();
+
+        @SerializedName("snippet")
+        public Snippet snippet = new Snippet();
+
     }
-    public static class Videos {
-        public String video_id ;
-        public String published_at;
-        public String updated_at;
-        public String uploaded_at;
-        public String recorded_at;
-        public  String title;
-        public String description;
-        public String duration;
-        public String player_url;
-        public String view_count;
-        public String favorite_count;
-        public String comment_count;
-        public String widescreen;
-        public String noembed;
-        public String safe_search;
-        public String position;
-        public String video_position;
-        public String latitude;
-        public String longitude;
-        public String insight_uri;
-        public String unique_id;
-        public String perm_private;
+    public static class PageInfo {
+        @SerializedName("totalResults")
+        public String totalResults ;
+    }
+    public static class Snippet {
+        @SerializedName("title")
+        public String VideoTitle ;
+
+        @SerializedName("description")
+        public String description ;
+
         @SerializedName("thumbnails")
-        public ArrayList<String> thumbnails = new ArrayList<String>();
-        @SerializedName("author")
-        public Author author = new Author();
+        public Thumbnails thumbnails = new Thumbnails();
     }
-    public class Thumbnails {
+    public static class Thumbnails {
+        @SerializedName("default")
+        public Default aDefault = new Default();
+    }
+    public static class Default {
         @SerializedName("url")
         public String url ;
     }
-    public static class Author {
-        @SerializedName("name")
-        public String name ;
+    public static class VideoId {
+        @SerializedName("videoId")
+        public String vedioid ;
     }
 
 }
