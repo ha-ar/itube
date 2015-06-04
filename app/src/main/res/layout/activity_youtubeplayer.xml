@@ -58,7 +58,7 @@
         android:layout_below="@+id/layout"
         android:background="@android:color/black"
         android:layout_width="match_parent"
-        android:layout_height="216dp">
+        android:layout_height="180dp">
 
         <ImageView
             android:id="@+id/animation"

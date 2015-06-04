@@ -31,15 +31,13 @@ import services.ExpiryUpdateService;
 /**
  * Created by android on 11/13/14.
  */
-public class BaseActivity extends Activity{ //implements BillingProcessor.IBillingHandler{
+public class BaseActivity extends Activity{
     static  TextView language;AQuery aq;int open;static PopupWindow popupWindow;
     static  BaseClass baseClass;static SearchView searchView;LinearLayout layout;MenuDrawer mDrawerLeft;
     static BroadcastReceiver receiver = null;
     static Long minutes;
     AlertDialog dialog;
     private String expiryUpdate = "43800";
-   // BillingProcessor bp;
-    private String inAppKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt1bneditxo/p+q3yffJlUFO1X+M8r5G+WjpHOjccBD0gkHYC7YfwVDwJA0UUMRbSO/dnfYT38LIxMOJBnAK+PLGv1N3kciDDZamGOADZtC1gW9eTlMM3OWkc7KUxvltfk2miHpG8elM9ZGl1zPoLGmgkg3DXKz+IjVsVXt2I8OTt/vqSn7zeezWANfVTqlakFuiN1pXoo76/ER87g8gM9HLpysenbRNBAIvvJcPQog0Uu+ol4csLtvSmSPY4OmMrfPml8lfJh5cF1Uov8cTSvMuC+muAttXiZAIUoD8eU3laDJvdZsee5pbr2Z2dFQ3ZJAmkm33lkQuGKay7FNv7iQIDAQAB";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +50,6 @@ public class BaseActivity extends Activity{ //implements BillingProcessor.IBilli
         mDrawerLeft.setupUpIndicator(this);
         baseClass  =((BaseClass) getApplicationContext());
         aq = new AQuery(this);
-       // bp = new BillingProcessor(this, inAppKey, this);
 
         minutes = baseClass.getCheckDuration();
         if(BaseClass.isTabletDevice(this))
@@ -277,50 +274,12 @@ public class BaseActivity extends Activity{ //implements BillingProcessor.IBilli
     public void onDestroy() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver);
         receiver = null;
-//        if (bp != null)
-//            bp.release();
 
         super.onDestroy();
     }
 
-
-    // IBillingHandler implementation
-
-//    @Override
-//    public void onBillingInitialized() {
-//        Log.e("Billing", "billing init");
-//        /*
-//         * Called when BillingProcessor was initialized and it's ready to purchase
-//         */
-//    }
-
-//    @Override
-//    public void onProductPurchased(String productId, TransactionDetails details) {
-//        Log.e("Billing", "billing purchased");
-//        /*
-//         * Called when requested PRODUCT ID was successfully purchased
-//         */
-//        ExpiryUpdateService obj = new ExpiryUpdateService(BaseActivity.this);
-//        obj.expiryUpdate(expiryUpdate, true, baseClass.getAUTH_TOKEN(), new CallBack(BaseActivity.this, "expiryUpdate"));
-//
-//    }
-
-//    @Override
-//    public void onBillingError(int errorCode, Throwable error) {
-//        Log.e("error code", errorCode+"");
-//
-//    }
-//
-//    @Override
-//    public void onPurchaseHistoryRestored() {
-//        /*
-//         * Called when purchase history was restored and the list of all owned PRODUCT ID's
-//         * was loaded from Google Play
-//         */
-//    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-       // if (!bp.handleActivityResult(requestCode, resultCode, data))
             super.onActivityResult(requestCode, resultCode, data);
     }
     public void expiryUpdate(Object caller, Object model) {

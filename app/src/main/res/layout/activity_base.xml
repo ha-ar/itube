@@ -18,6 +18,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:padding="10dp"
+        android:layout_marginRight="10dp"
         android:textColor="#9eded7"
         android:layout_toRightOf="@+id/smalllogo"
         android:id="@+id/select_language"

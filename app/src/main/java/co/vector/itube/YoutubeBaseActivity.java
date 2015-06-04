@@ -130,7 +130,7 @@ public class YoutubeBaseActivity extends YouTubeFailureRecoveryActivity implemen
         SetOnCreate();
         if(baseClass.getIsFromFavorites().equalsIgnoreCase("YES"))
         {
-            aq.id(R.id.animation_layout).getView().getLayoutParams().height =MATCH_PARENT;
+            aq.id(R.id.animation_layout).getView().getLayoutParams().height = MATCH_PARENT;
         }
         if (isPlaylistVideoIdExist()) {
             aq.id(R.id.add_playlist).background(R.drawable.minus);

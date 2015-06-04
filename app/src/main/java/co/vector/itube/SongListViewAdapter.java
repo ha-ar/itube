@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,7 +23,7 @@ import Models.GetAllByCategoryModel;
 /**
  * Created by android on 12/3/14.
  */
-public class SongListViewAdapter extends ArrayAdapter<ItemDetails> {
+public class SongListViewAdapter extends BaseAdapter {
     private static ArrayList<ItemDetails> itemDetailsrrayList;
     private static ArrayList<ItemDetailsDuration> itemDetailsrrayListDuration;
     Context ctx;
@@ -33,22 +34,25 @@ public class SongListViewAdapter extends ArrayAdapter<ItemDetails> {
 
     public SongListViewAdapter(Context context,int image_layout, ArrayList<ItemDetails> results,
                                ArrayList<ItemDetailsDuration> resultsDuration) {
-        super(context,image_layout,  results);
         itemDetailsrrayList = results;
         itemDetailsrrayListDuration = resultsDuration;
         arraylist = new ArrayList<ItemDetails>();
         arraylistDuration = new ArrayList<ItemDetailsDuration>();
         newArrayListId = new ArrayList<String>();
         arraylist.addAll(itemDetailsrrayList);
-        try {
+       if(itemDetailsrrayListDuration != null){
             arraylistDuration.addAll(itemDetailsrrayListDuration);
-        }catch (NullPointerException e){}
+        }
         layoutId = image_layout;
         this.ctx = context;
     }
 
     public int getCount() {
-        return GetAllByCategoryModel.getInstance().items.size();
+        return itemDetailsrrayList.size();
+    }
+
+    public Object getItem(int position) {
+        return itemDetailsrrayList.get(position);
     }
 
     public long getItemId(int position) {
@@ -71,20 +75,17 @@ public class SongListViewAdapter extends ArrayAdapter<ItemDetails> {
             holder = (ViewHolder) convertView.getTag();
         }
         AQuery aq = new AQuery(convertView);
-        try {
-            String time = null;
-//            time = itemDetailsrrayList.get(position).getduration();
-//            String splitedtiem = CalculateTime(Long.parseLong(time) * 1000);
-            try {
-            holder.txt_Name.setText(itemDetailsrrayList.get(position).getName());
-            holder.txt_duration.setText(itemDetailsrrayListDuration.get(position).getDuration());
 
-        } catch (NullPointerException npe) {
-        }
+        if(position < itemDetailsrrayList.size()) {
+        holder.txt_Name.setText(itemDetailsrrayList.get(position).getName());
         ImageOptions options = new ImageOptions();
         options.targetWidth = 200;
         aq.id(R.id.image).image(itemDetailsrrayList.get(position).getImage(), options);
-        }catch (IndexOutOfBoundsException e){}
+        }
+       if(itemDetailsrrayListDuration !=null){
+            if(position< itemDetailsrrayListDuration.size())
+            holder.txt_duration.setText(itemDetailsrrayListDuration.get(position).getDuration());
+        }
         holder.dropDown.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -106,29 +107,27 @@ public class SongListViewAdapter extends ArrayAdapter<ItemDetails> {
         ImageView dropDown;
     }
 
-    public void filter(String charText) {
-
-        charText = charText.toLowerCase(Locale.getDefault());
-        itemDetailsrrayList.clear();
-        itemDetailsrrayListDuration.clear();
-
-        if (charText.length() == 0) {
-            itemDetailsrrayList.addAll(arraylist);
-            itemDetailsrrayListDuration.addAll(arraylistDuration);
-        } else {
-            Log.e("TExt",charText);
-            for (int loop=0;loop<arraylist.size() ; loop++) {
-                if (arraylist.get(loop).getName().toLowerCase().contains(charText)) {
-                    Log.e("Name", arraylist.get(loop).getName() + "/" + charText);
-                    try {
-                    itemDetailsrrayList.add(arraylist.get(loop));
-                    itemDetailsrrayListDuration.add(arraylistDuration.get(loop));
-                    }catch (IndexOutOfBoundsException e){}
-                }
-            }
-        }
-        notifyDataSetChanged();
-    }
+//    public void filter(String charText) {
+//
+//        charText = charText.toLowerCase(Locale.getDefault());
+//        itemDetailsrrayList.clear();
+//        itemDetailsrrayListDuration.clear();
+//        if (charText.length() == 0) {
+//            itemDetailsrrayList.addAll(arraylist);
+//            itemDetailsrrayListDuration.addAll(arraylistDuration);
+//        } else {
+//            Log.e("TExt",charText);
+//            for (int loop=0;loop<arraylist.size() ; loop++) {
+//                if (arraylist.get(loop).getName().toLowerCase().contains(charText)) {
+//                    Log.e("Name", arraylist.get(loop).getName() + "/" + charText);
+//                    itemDetailsrrayList.add(arraylist.get(loop));
+//                    if(loop < arraylistDuration.size())
+//                    itemDetailsrrayListDuration.add(arraylistDuration.get(loop));
+//                }
+//            }
+//        }
+//       notifyDataSetInvalidated();
+//    }
 
     public String CalculateTime(long millisUntilFinished) {
         long hours = millisUntilFinished / 3600000;

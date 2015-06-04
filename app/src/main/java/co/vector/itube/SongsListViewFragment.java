@@ -56,11 +56,11 @@ import services.GetByAllCategoryService;
  * Created by android on 11/17/14.
  */
 public class SongsListViewFragment extends Fragment {
-    BaseClass baseClass;List<String> list;int total_count;
+    BaseClass baseClass;List<String> list;
     AQuery aq;static PopupWindow popupWindow;
-    public static SongListViewAdapter songListViewAdapter;
+    public SongListViewAdapter songListViewAdapter;
     View rootView;static  int SelectedId;  String popUpContents[];static String Query;
-    static GridView list_songs;static int index;
+    GridView list_songs;static int index;
     GetByAllCategoryService obj;
     ArrayList<ItemDetailsDuration> image_details_duration;
     ArrayList<ItemDetails> image_details;
@@ -111,12 +111,16 @@ public class SongsListViewFragment extends Fragment {
         else
             list_songs.setNumColumns(5);
         baseClass = ((BaseClass)getActivity().getApplicationContext());
-        BaseActivity.language.setText("Browse "+baseClass.getCategory());
+        BaseActivity.language.setText("Browse " + baseClass.getCategory());
 
         BaseActivity.searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 index=1;
+                GetAllByCategoryModel.getInstance().items.clear();
+                DurationModel.getInstance().items.clear();
+                GetAllByCategoryModel.getInstance().nextPageToken="";
+                baseClass.setDurationCounter(0);
                 baseClass.setDataBy("Search");
                 try {
                     InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -131,13 +135,7 @@ public class SongsListViewFragment extends Fragment {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (newText.length() != 0) {
-                    try{
-                        songListViewAdapter.filter(newText);
-                    }catch (NullPointerException npe){}
-                }
-                else
-                {
+                if (newText.length() == 0) {
                     try {
                         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(BaseActivity.searchView.getWindowToken(), 0);
@@ -149,29 +147,10 @@ public class SongsListViewFragment extends Fragment {
         PrepareDropDown();
 
         obj = new GetByAllCategoryService(getActivity());
-        obj.getbycategory(baseClass.getNewCategory(),baseClass.getDuration(), "",true,
+        obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), "", true,
                 new CallBack(SongsListViewFragment.this, "GetAllBy" + baseClass.getCategory()));
 
-//        footerView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                index++;
-//                try{
-//                    footerView.setVisibility(View.GONE);
-//                }catch (NullPointerException e){}
-//                obj = new GetByAllCategoryService(getActivity());
-//                if(baseClass.getDataBy().equalsIgnoreCase("Category")) {
-//                    obj.getbycategory(baseClass.getNewCategory(), baseClass.getDuration(), baseClass.getAUTH_TOKEN(), index, true,
-//                            new CallBack(SongsListViewFragment.this, "GetAllBy" + baseClass.getCategory() + "More"));
-//                }
-//                else
-//                {
-//                    obj.getbysearch(Query, baseClass.getAUTH_TOKEN(), index, true,
-//                            new CallBack(SongsListViewFragment.this, "GetAllBySearchMore"));
-//                }
-//
-//            }
-//        });
+
         list_songs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -188,31 +167,32 @@ public class SongsListViewFragment extends Fragment {
     }
     public void GetAllBySearch(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().setList((GetAllByCategoryModel) model);
-        GetDurationDetail();
-        if (GetAllByCategoryModel.getInstance().items.size()==0) {
+    Log.e("Size","/"+GetAllByCategoryModel.getInstance().items.size());
+      //  if (GetAllByCategoryModel.getInstance().items.size()==0) {
             Log.e("Index",String.valueOf(index));
             image_details = GetSearchResults();
-//                songListViewAdapter = new SongListViewAdapter(
-//                        getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
+                songListViewAdapter = new SongListViewAdapter(
+                        getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             list_songs.setAdapter(songListViewAdapter);
+            GetDurationDetail();
             if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
             aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
             aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
 
-        } else {
-            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
-            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
-        }
+//        } else {
+//            aq.id(R.id.textView).visibility(View.VISIBLE).text("No "+baseClass.getCategory()+" record found.");
+//            Crouton.makeText(getActivity(), "Check internet settings or server not responding.", Style.ALERT).show();
+//        }
     }
     public void GetAllBySearchMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        GetDurationDetail();
-            Log.e("Index",String.valueOf(index));
+
             image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             songListViewAdapter.notifyDataSetChanged();
+        GetDurationDetail();
             if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
@@ -226,8 +206,8 @@ public class SongsListViewFragment extends Fragment {
                 image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
-                list_songs.setAdapter(songListViewAdapter);
-            GetDurationDetail();
+        list_songs.setAdapter(songListViewAdapter);
+        GetDurationDetail();
             if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
@@ -239,13 +219,12 @@ public class SongsListViewFragment extends Fragment {
     }
     public void GetAllByMoviesMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        GetDurationDetail();
                 Log.e("Index",String.valueOf(index));
                 image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
                 songListViewAdapter.notifyDataSetChanged();
-
+            GetDurationDetail();
             if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
@@ -296,25 +275,25 @@ public class SongsListViewFragment extends Fragment {
     }
     public void GetAllByCartoons(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().setList((GetAllByCategoryModel) model);
-        GetDurationDetail();
+
             image_details = GetSearchResults();
                 songListViewAdapter = new SongListViewAdapter(
                         getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             list_songs.setAdapter(songListViewAdapter);
+        GetDurationDetail();
             if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
                 aq.id(R.id.total_results).text("Total Results: Less Than 5 Mil");
-
     }
     public void GetAllByCartoonsMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        GetDurationDetail();
             Log.e("Index",String.valueOf(index));
         image_details = GetSearchResults();
         songListViewAdapter = new SongListViewAdapter(
                 getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             songListViewAdapter.notifyDataSetChanged();
+        GetDurationDetail();
             if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
@@ -323,11 +302,12 @@ public class SongsListViewFragment extends Fragment {
     }
     public void GetAllByMusic(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().setList((GetAllByCategoryModel) model);
-        GetDurationDetail();
+
             image_details = GetSearchResults();
             songListViewAdapter = new SongListViewAdapter(
                     getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             list_songs.setAdapter(songListViewAdapter);
+        GetDurationDetail();
             if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
@@ -336,11 +316,12 @@ public class SongsListViewFragment extends Fragment {
     }
     public void GetAllByMusicMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        GetDurationDetail();
+
         image_details = GetSearchResults();
         songListViewAdapter = new SongListViewAdapter(
                 getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             songListViewAdapter.notifyDataSetChanged();
+        GetDurationDetail();
             if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
@@ -349,11 +330,12 @@ public class SongsListViewFragment extends Fragment {
     }
     public void GetAllByDocumentaries(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().setList((GetAllByCategoryModel) model);
-        GetDurationDetail();
+
             image_details = GetSearchResults();
             songListViewAdapter = new SongListViewAdapter(
                     getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             list_songs.setAdapter(songListViewAdapter);
+        GetDurationDetail();
             if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
@@ -362,11 +344,12 @@ public class SongsListViewFragment extends Fragment {
     }
     public void GetAllByDocumentariesMore(Object caller, Object model) {
         GetAllByCategoryModel.getInstance().appendList((GetAllByCategoryModel) model);
-        GetDurationDetail();
+
         image_details = GetSearchResults();
         songListViewAdapter = new SongListViewAdapter(
                 getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
             songListViewAdapter.notifyDataSetChanged();
+        GetDurationDetail();
             if(GetAllByCategoryModel.getInstance().pageInfo.totalResults.equals("1000000"))
                 aq.id(R.id.total_results).text("Total Results: More Than 5 Mil");
             else
@@ -395,7 +378,7 @@ public class SongsListViewFragment extends Fragment {
         image_details_duration = GetSearchResultsDuration();
         songListViewAdapter = new SongListViewAdapter(
                 getActivity(),R.layout.layout_songs_list_maker, image_details,image_details_duration);
-        songListViewAdapter.notifyDataSetInvalidated();
+        songListViewAdapter.notifyDataSetChanged();
     }
     static int p1;
     private static ArrayList<ItemDetailsDuration> GetSearchResultsDuration() {
