@@ -1,13 +1,11 @@
 package co.vector.itube;
 
 import android.app.Fragment;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,18 +21,7 @@ import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.androidquery.AQuery;
-import com.androidquery.callback.AjaxCallback;
-import com.androidquery.callback.AjaxStatus;
-import com.google.api.client.http.HttpRequest;
-import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.services.youtube.YouTube;
-import com.google.api.services.youtube.model.SearchListResponse;
-import com.google.api.services.youtube.model.SearchResult;
-import com.google.gson.Gson;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +33,6 @@ import DB.Playlist;
 import DB.PlaylistDao;
 import Models.DurationModel;
 import Models.GetAllByCategoryModel;
-import Models.VideoItem;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import services.CallBack;
@@ -444,6 +430,7 @@ public class SongsListViewFragment extends Fragment {
         }
     }
     public void AddedSongToPlaylist(){
+        Log.e("ADD SOMGS TO PLAYLIST","SONGS");
         DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
                 getActivity(), "javantube.sqlite", null);
         SQLiteDatabase ex_db = ex_database_helper_obj

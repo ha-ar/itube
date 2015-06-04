@@ -4,7 +4,6 @@ import android.app.Fragment;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -136,6 +135,8 @@ public class UserFavoriteFragment extends Fragment {
         }
     }
     public void DeletedSongFromFavorite(){
+        Log.e("DB Fav" ,"db Fav ");
+
         DaoMaster.DevOpenHelper ex_database_helper_obj = new DaoMaster.DevOpenHelper(
                 getActivity(), "javantube.sqlite", null);
         SQLiteDatabase ex_db = ex_database_helper_obj

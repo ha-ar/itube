@@ -2,12 +2,10 @@ package co.vector.itube;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -59,11 +57,8 @@ public class ItemListBaseAdapter extends ArrayAdapter<ItemDetails> {
         }
         AQuery aq = new AQuery(convertView);
         try {
-            String time = null;
-            time = itemDetailsrrayList.get(position).getduration();
-            String splitedtiem = CalculateTime(Long.parseLong(time) * 1000);
-            holder.txt_Name.setText(itemDetailsrrayList.get(position).getName());
-            holder.txt_duration.setText(splitedtiem);
+
+            holder.txt_duration.setText( getTimeFromString(itemDetailsrrayList.get(position).getduration()));
         }catch (NullPointerException npe){}
         ImageOptions options = new ImageOptions();
         options.targetWidth = 200;
@@ -142,5 +137,58 @@ public class ItemListBaseAdapter extends ArrayAdapter<ItemDetails> {
         }
         stringBuilder.append(seconds);
         return  stringBuilder.toString();
+    }
+    private static String getTimeFromString(String duration) {
+        // TODO Auto-generated method stub
+        String time = "";
+        boolean hourexists = false, minutesexists = false, secondsexists = false;
+        if (duration.contains("H"))
+            hourexists = true;
+        if (duration.contains("M"))
+            minutesexists = true;
+        if (duration.contains("S"))
+            secondsexists = true;
+        if (hourexists) {
+            String hour = "";
+            hour = duration.substring(duration.indexOf("T") + 1,
+                    duration.indexOf("H"));
+            if (hour.length() == 1)
+                hour = "0" + hour;
+            time += hour + ":";
+        }
+        if (minutesexists) {
+            String minutes = "";
+            if (hourexists)
+                minutes = duration.substring(duration.indexOf("H") + 1,
+                        duration.indexOf("M"));
+            else
+                minutes = duration.substring(duration.indexOf("T") + 1,
+                        duration.indexOf("M"));
+            if (minutes.length() == 1)
+                minutes = "0" + minutes;
+            time += minutes + ":";
+        } else {
+            time += "00:";
+        }
+        if (secondsexists) {
+            String seconds = "";
+            if (hourexists) {
+                if (minutesexists)
+                    seconds = duration.substring(duration.indexOf("M") + 1,
+                            duration.indexOf("S"));
+                else
+                    seconds = duration.substring(duration.indexOf("H") + 1,
+                            duration.indexOf("S"));
+            } else if (minutesexists)
+                seconds = duration.substring(duration.indexOf("M") + 1,
+                        duration.indexOf("S"));
+            else
+                seconds = duration.substring(duration.indexOf("T") + 1,
+                        duration.indexOf("S"));
+            if (seconds.length() == 1)
+                seconds = "0" + seconds;
+            time += seconds;
+        }
+        return time;
     }
 }
