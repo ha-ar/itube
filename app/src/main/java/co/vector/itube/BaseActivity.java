@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.androidquery.AQuery;
 
@@ -25,8 +26,6 @@ import net.simonvt.menudrawer.Position;
 import Models.AdsMessage;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
-import services.CallBack;
-import services.ExpiryUpdateService;
 
 /**
  * Created by android on 11/13/14.
@@ -187,20 +186,36 @@ public class BaseActivity extends Activity{
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
+                Log.e("whatsapp1", "whatsapp");
+
                 // TODO Auto-generated method stub
                 PackageManager pm=getPackageManager();
-                if (options[which].equals("Whats App")) {
-                    try {
-                        Intent waIntent = new Intent(Intent.ACTION_SEND);
-                        waIntent.setType("text/plain");
-                        pm.getPackageInfo("com.whatsapp", PackageManager.GET_META_DATA);
-                        waIntent.setPackage("com.whatsapp");
-                        waIntent.putExtra(Intent.EXTRA_TEXT, urlToShare);
+                if (options[which].equals("WhatsApp")) {
+                    Log.e("whatsapp12", "whatsapp");
+                    Intent waIntent = new Intent(Intent.ACTION_SEND);
+                    waIntent.setType("text/plain");
+                    String text = "YOUR TEXT HERE";
+                    waIntent.setPackage("com.whatsapp");
+                    if (waIntent != null) {
+                        waIntent.putExtra(Intent.EXTRA_TEXT, urlToShare);//
                         startActivity(Intent.createChooser(waIntent, "Share with"));
-
-                    } catch (PackageManager.NameNotFoundException e) {
-                        Crouton.makeText(BaseActivity.this, "WhatsApp not Installed", Style.ALERT).show();
+                    } else {
+                        Toast.makeText(BaseActivity.this, "WhatsApp not Installed", Toast.LENGTH_SHORT)
+                                .show();
                     }
+//
+//                        Intent waIntent = new Intent(Intent.ACTION_SEND);
+//                        Log.e("whatsapp12", "whatsapp");
+//
+//                        waIntent.setType("text/plain");
+////                        pm.getPackageInfo("com.whatsapp", PackageManager.GET_META_DATA);
+//                        waIntent.setPackage("com.whatsapp");
+//                        waIntent.putExtra(Intent.EXTRA_TEXT, urlToShare);
+//                        startActivity(Intent.createChooser(waIntent, "Share with"));
+
+//                    } catch (PackageManager.NameNotFoundException e) {
+//                        Crouton.makeText(BaseActivity.this, "WhatsApp not Installed", Style.ALERT).show();
+//                    }
 
                 } else if (options[which].equals("Viber")) {
                     try {

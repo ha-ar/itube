@@ -10,23 +10,42 @@ import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.androidquery.AQuery;
+import com.paypal.android.sdk.payments.PayPalConfiguration;
+import com.paypal.android.sdk.payments.PayPalItem;
+import com.paypal.android.sdk.payments.PayPalPayment;
+import com.paypal.android.sdk.payments.PayPalPaymentDetails;
+import com.paypal.android.sdk.payments.PayPalService;
+import com.paypal.android.sdk.payments.PaymentActivity;
+import com.paypal.android.sdk.payments.PaymentConfirmation;
+
+import org.json.JSONException;
+
+import java.math.BigDecimal;
 
 import Models.AdsMessage;
 import Models.UserModel;
 import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import services.CallBack;
-import services.ExpiryUpdateService;
 import services.LoginService;
+import services.SignupService;
 
-public class LoginActivity extends Activity{// implements BillingProcessor.IBillingHandler{
+public class LoginActivity extends Activity {//implements  BillingProcessor.IBillingHandler{
     private static final String TAG = "Android BillingService";
     AQuery aq;
     LoginService obj;
     private String expiryUpdate = "43800";
-   // BillingProcessor bp;
+    private static final String CONFIG_ENVIRONMENT = PayPalConfiguration.ENVIRONMENT_SANDBOX;
+    private static final String CONFIG_CLIENT_ID = "AQniU0uc6MT5kS1JcA2nOWf5mbwfEOYlGhFuiXUTNTChQmtuR0grEkAZrOS9MaCaj7yYSDybpxRAWXOL";
+
+    private static PayPalConfiguration config = new PayPalConfiguration()
+            .environment(CONFIG_ENVIRONMENT)
+            .clientId(CONFIG_CLIENT_ID);
+    private static final int REQUEST_CODE_PAYMENT = 1;
+//    BillingProcessor bp;
     private String inAppKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAt1bneditxo/p+q3yffJlUFO1X+M8r5G+WjpHOjccBD0gkHYC7YfwVDwJA0UUMRbSO/dnfYT38LIxMOJBnAK+PLGv1N3kciDDZamGOADZtC1gW9eTlMM3OWkc7KUxvltfk2miHpG8elM9ZGl1zPoLGmgkg3DXKz+IjVsVXt2I8OTt/vqSn7zeezWANfVTqlakFuiN1pXoo76/ER87g8gM9HLpysenbRNBAIvvJcPQog0Uu+ol4csLtvSmSPY4OmMrfPml8lfJh5cF1Uov8cTSvMuC+muAttXiZAIUoD8eU3laDJvdZsee5pbr2Z2dFQ3ZJAmkm33lkQuGKay7FNv7iQIDAQAB";
 
     private BaseClass baseClass;
@@ -85,10 +104,12 @@ public class LoginActivity extends Activity{// implements BillingProcessor.IBill
         aq.id(R.id.register_here).clicked(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                InputMethodManager imm = (InputMethodManager)getApplicationContext().getSystemService(
+                InputMethodManager imm = (InputMethodManager) getApplicationContext().getSystemService(
                         Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(Register.getWindowToken(), 0);
-                startActivity(new Intent(LoginActivity.this,SignupActivity.class));
+
+
+                startActivity(new Intent(LoginActivity.this, SignupActivity.class));
             }
         });
         aq.id(R.id.forgot_password).clicked(new View.OnClickListener() {
@@ -111,9 +132,10 @@ public class LoginActivity extends Activity{// implements BillingProcessor.IBill
             LoginActivity.this.finish();
         }
     }
-    public void ConfirmLogin(Object caller, Object model) {
+        public void ConfirmLogin(Object caller, Object model) {
         UserModel.getInstance().setList((UserModel) model);
         if (UserModel.getInstance().success.equalsIgnoreCase("true")) {
+            Log.e("SUCCESS",UserModel.getInstance().success + "/" + UserModel.getInstance().expire);
             baseClass.setAUTH_TOKEN(UserModel.getInstance().auth_token);
             startActivity(new Intent(LoginActivity.this, BaseActivity.class));
             LoginActivity.this.finish();
@@ -121,6 +143,7 @@ public class LoginActivity extends Activity{// implements BillingProcessor.IBill
             if (UserModel.getInstance().expire.equalsIgnoreCase("false")) {
                 baseClass.setAUTH_TOKEN(UserModel.getInstance().user.auth_token);
                 baseClass.setEmail(aq.id(R.id.email).getText().toString());
+
                 baseClass.setCheckDuration(Long.parseLong(UserModel.getInstance().user.duration));
                 obj.isActive(aq.id(R.id.email).getText().toString(), true, new CallBack(LoginActivity.this, "IsActive"));
             } else {
@@ -131,8 +154,8 @@ public class LoginActivity extends Activity{// implements BillingProcessor.IBill
                         .setPositiveButton("Yes",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-                                        //bp.purchase(LoginActivity.this, "android.test.purchased");
-
+//                                        bp.purchase(LoginActivity.this, "android.test.purchased");
+//                                        onBuyPressed();
                                     }
                                 }).setNegativeButton("No", null).show();
             }
@@ -192,12 +215,110 @@ public class LoginActivity extends Activity{// implements BillingProcessor.IBill
 
         super.onDestroy();
     }
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+////        if (!bp.handleActivityResult(requestCode, resultCode, data))
+//            super.onActivityResult(requestCode, resultCode, data);
+//    }
+
+    public void onBuyPressed() {
+        /*
+         * PAYMENT_INTENT_SALE will cause the payment to complete immediately.
+         * Change PAYMENT_INTENT_SALE to
+         *   - PAYMENT_INTENT_AUTHORIZE to only authorize payment and capture funds later.
+         *   - PAYMENT_INTENT_ORDER to create a payment for authorization and capture
+         *     later via calls from your server.
+         *
+         * Also, to include additional payment details and an item list, see getStuffToBuy() below.
+         */
+        PayPalPayment thingToBuy = getThingToBuy(PayPalPayment.PAYMENT_INTENT_SALE);
+
+        /*
+         * See getStuffToBuy(..) for examples of some available payment options.
+         */
+
+        Intent intent = new Intent(LoginActivity.this, PaymentActivity.class);
+        intent.putExtra(PayPalService.EXTRA_PAYPAL_CONFIGURATION, config);
+
+        intent.putExtra(PaymentActivity.EXTRA_PAYMENT, thingToBuy);
+
+        startActivityForResult(intent, REQUEST_CODE_PAYMENT);
+    }
+    private PayPalPayment getThingToBuy(String paymentIntent) {
+        return new PayPalPayment(new BigDecimal("1.75"), "USD", "sample item",
+                paymentIntent);
+    }
+
+    /*
+     * This method shows use of optional payment details and item list.
+     */
+    private PayPalPayment getStuffToBuy(String paymentIntent) {
+        //--- include an item list, payment amount details
+        PayPalItem[] items =
+                {
+                        new PayPalItem("sample item #1", 2, new BigDecimal("87.50"), "USD",
+                                "sku-12345678"),
+                        new PayPalItem("free sample item #2", 1, new BigDecimal("0.00"),
+                                "USD", "sku-zero-price"),
+                        new PayPalItem("sample item #3 with a longer name", 6, new BigDecimal("37.99"),
+                                "USD", "sku-33333")
+                };
+        BigDecimal subtotal = PayPalItem.getItemTotal(items);
+        BigDecimal shipping = new BigDecimal("7.21");
+        BigDecimal tax = new BigDecimal("4.67");
+        PayPalPaymentDetails paymentDetails = new PayPalPaymentDetails(shipping, subtotal, tax);
+        BigDecimal amount = subtotal.add(shipping).add(tax);
+        PayPalPayment payment = new PayPalPayment(amount, "USD", "sample item", paymentIntent);
+        payment.items(items).paymentDetails(paymentDetails);
+
+        //--- set other optional fields like invoice_number, custom field, and soft_descriptor
+        payment.custom("This is text that will be associated with the payment that the app can use.");
+
+        return payment;
+    }
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-      //  if (!bp.handleActivityResult(requestCode, resultCode, data))
-            super.onActivityResult(requestCode, resultCode, data);
-    }
-}
+        if (requestCode == REQUEST_CODE_PAYMENT) {
+            if (resultCode == Activity.RESULT_OK) {
+                PaymentConfirmation confirm =
+                        data.getParcelableExtra(PaymentActivity.EXTRA_RESULT_CONFIRMATION);
+                if (confirm != null) {
+                    try {
+                        Log.i(TAG, confirm.toJSONObject().toString(4));
+                        Log.i(TAG, confirm.getPayment().toJSONObject().toString(4));
+                        /**
+                         *  TODO: send 'confirm' (and possibly confirm.getPayment() to your server for verification
+                         * or consent completion.
+                         * See https://developer.paypal.com/webapps/developer/docs/integration/mobile/verify-mobile-payment/
+                         * for more details.
+                         *
+                         * For sample mobile backend interactions, see
+                         * https://github.com/paypal/rest-api-sdk-python/tree/master/samples/mobile_backend
+                         */
+                        Toast.makeText(
+                                getApplicationContext(),
+                                "PaymentConfirmation info received from PayPal", Toast.LENGTH_LONG)
+                                .show();
+
+                        SignupService obj = new SignupService(LoginActivity.this);
+                        obj.signup(aq.id(R.id.email).getText().toString(),
+                                aq.id(R.id.password).getText().toString(),
+                                aq.id(R.id.confirm_password).getText().toString(), baseClass.getGCM_Key(), true, new CallBack(LoginActivity.this, "ConfirmSignup"));
+
+                    } catch (JSONException e) {
+                        Log.e(TAG, "an extremely unlikely failure occurred: ", e);
+                    }
+                }
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Log.i(TAG, "The user canceled.");
+            } else if (resultCode == PaymentActivity.RESULT_EXTRAS_INVALID) {
+                Log.i(
+                        TAG,
+                        "An invalid Payment or PayPalConfiguration was submitted. Please see the docs.");
+            }
+
+        }
+    }}
 
 
 
