@@ -22,6 +22,8 @@ public class SignupService extends BaseService {
         params.put("user[password]", mPassword);
         params.put("user[gcm_id]", GCM_id);
         params.put("user[confirmation_password]", confirmPassword);
+        params.put("user[time_usage]","3");
+
         this.post(url, params, obj, UserModel.getInstance(), message);
     }
 }

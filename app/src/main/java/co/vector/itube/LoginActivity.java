@@ -31,7 +31,6 @@ import de.keyboardsurfer.android.widget.crouton.Crouton;
 import de.keyboardsurfer.android.widget.crouton.Style;
 import services.CallBack;
 import services.LoginService;
-import services.SignupService;
 
 public class LoginActivity extends Activity {//implements  BillingProcessor.IBillingHandler{
     private static final String TAG = "Android BillingService";
@@ -124,6 +123,7 @@ public class LoginActivity extends Activity {//implements  BillingProcessor.IBil
     public void IsActive(Object caller, Object model) {
         UserModel.getInstance().setList((UserModel) model);
         if (UserModel.getInstance().success.equalsIgnoreCase("true")) {
+            Log.e("ActiveSession",UserModel.getInstance().success);
             startActivity(new Intent(LoginActivity.this, BaseActivity.class));
             LoginActivity.this.finish();
         }
@@ -135,10 +135,8 @@ public class LoginActivity extends Activity {//implements  BillingProcessor.IBil
         public void ConfirmLogin(Object caller, Object model) {
         UserModel.getInstance().setList((UserModel) model);
         if (UserModel.getInstance().success.equalsIgnoreCase("true")) {
-            Log.e("SUCCESS",UserModel.getInstance().success + "/" + UserModel.getInstance().expire);
+            Log.e("SUCCESS", UserModel.getInstance().success + "/" + UserModel.getInstance().expire);
             baseClass.setAUTH_TOKEN(UserModel.getInstance().auth_token);
-            startActivity(new Intent(LoginActivity.this, BaseActivity.class));
-            LoginActivity.this.finish();
             //in case of expiry
             if (UserModel.getInstance().expire.equalsIgnoreCase("false")) {
                 baseClass.setAUTH_TOKEN(UserModel.getInstance().user.auth_token);
@@ -154,8 +152,7 @@ public class LoginActivity extends Activity {//implements  BillingProcessor.IBil
                         .setPositiveButton("Yes",
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-//                                        bp.purchase(LoginActivity.this, "android.test.purchased");
-//                                        onBuyPressed();
+                                        onBuyPressed();
                                     }
                                 }).setNegativeButton("No", null).show();
             }
@@ -300,10 +297,8 @@ public class LoginActivity extends Activity {//implements  BillingProcessor.IBil
                                 "PaymentConfirmation info received from PayPal", Toast.LENGTH_LONG)
                                 .show();
 
-                        SignupService obj = new SignupService(LoginActivity.this);
-                        obj.signup(aq.id(R.id.email).getText().toString(),
-                                aq.id(R.id.password).getText().toString(),
-                                aq.id(R.id.confirm_password).getText().toString(), baseClass.getGCM_Key(), true, new CallBack(LoginActivity.this, "ConfirmSignup"));
+                        startActivity(new Intent(LoginActivity.this, BaseActivity.class));
+                        LoginActivity.this.finish();
 
                     } catch (JSONException e) {
                         Log.e(TAG, "an extremely unlikely failure occurred: ", e);

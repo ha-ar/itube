@@ -3,7 +3,6 @@ package co.vector.itube;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,13 +13,10 @@ import android.widget.Toast;
 
 import com.androidquery.AQuery;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.paypal.android.sdk.payments.PayPalAuthorization;
 import com.paypal.android.sdk.payments.PayPalConfiguration;
-import com.paypal.android.sdk.payments.PayPalFuturePaymentActivity;
 import com.paypal.android.sdk.payments.PayPalItem;
 import com.paypal.android.sdk.payments.PayPalPayment;
 import com.paypal.android.sdk.payments.PayPalPaymentDetails;
-import com.paypal.android.sdk.payments.PayPalProfileSharingActivity;
 import com.paypal.android.sdk.payments.PayPalService;
 import com.paypal.android.sdk.payments.PaymentActivity;
 import com.paypal.android.sdk.payments.PaymentConfirmation;
@@ -127,11 +123,11 @@ public class SignupActivity extends Activity {
                 }
                 /////////////////////////////////////////////
                 if (!baseClass.getGCM_Key().isEmpty()) {
-                    onBuyPressed();
-//                    SignupService obj = new SignupService(SignupActivity.this);
-//                    obj.signup(aq.id(R.id.email).getText().toString(),
-//                            aq.id(R.id.password).getText().toString(),
-//                            aq.id(R.id.confirm_password).getText().toString(), baseClass.getGCM_Key(), true, new CallBack(SignupActivity.this, "ConfirmSignup"));
+                   // onBuyPressed();
+                    SignupService obj = new SignupService(SignupActivity.this);
+                    obj.signup(aq.id(R.id.email).getText().toString(),
+                            aq.id(R.id.password).getText().toString(),
+                            aq.id(R.id.confirm_password).getText().toString(), baseClass.getGCM_Key(), true, new CallBack(SignupActivity.this, "ConfirmSignup"));
                 } else {
                     Crouton.makeText(SignupActivity.this, "Try again in few seconds", Style.ALERT).show();
                 }
@@ -243,7 +239,7 @@ public class SignupActivity extends Activity {
         UserModel.getInstance().setList((UserModel) model);
         if (UserModel.getInstance().success.equalsIgnoreCase("true")) {
             baseClass.setAUTH_TOKEN(UserModel.getInstance().user.auth_token);
-//            GCMRegistration();
+        //   GCMRegistration();
             // Toast.makeText(getApplication(), "Registered Successfully.", Toast.LENGTH_LONG).show();
             startActivity(new Intent(SignupActivity.this, LoginActivity.class));
             SignupActivity.this.finish();
